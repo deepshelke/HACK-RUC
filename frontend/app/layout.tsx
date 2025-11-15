@@ -1,0 +1,27 @@
+import type { Metadata } from 'next'
+import { AuthProvider } from '@/lib/contexts/AuthContext'
+import { ChatProvider } from '@/lib/contexts/ChatContext'
+import './globals.css'
+
+export const metadata: Metadata = {
+  title: 'HACK-RUC Chat',
+  description: 'Chat interface inspired by Gemini',
+}
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <html lang="en">
+      <body className="antialiased">
+        <AuthProvider>
+          <ChatProvider>
+            {children}
+          </ChatProvider>
+        </AuthProvider>
+      </body>
+    </html>
+  )
+}
