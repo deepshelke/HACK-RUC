@@ -49,7 +49,7 @@ export default function ChatInput({ onSendMessage, disabled, showSuggestions = t
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Ask HACK-RUC Chat..."
+            placeholder="Ask Fairly..."
             disabled={disabled}
             rows={1}
             className="flex-1 resize-none bg-transparent text-sm focus:outline-none max-h-32 overflow-y-auto placeholder:text-muted-foreground"

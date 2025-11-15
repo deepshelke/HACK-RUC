@@ -3,6 +3,7 @@
 import { Button } from '@/components/ui/button'
 import { Menu } from 'lucide-react'
 import UserAvatarMenu from './UserAvatarMenu'
+import Logo from '@/components/ui/logo'
 
 interface ChatHeaderProps {
   onMenuClick?: () => void
@@ -21,7 +22,7 @@ export default function ChatHeader({ onMenuClick }: ChatHeaderProps) {
           >
             <Menu className="h-5 w-5" />
           </Button>
-          <h1 className="text-base font-semibold">HACK-RUC Chat</h1>
+          <Logo width={24} height={24} showText={true} />
         </div>
         <div className="flex items-center gap-3">
           <UserAvatarMenu />

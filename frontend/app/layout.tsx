@@ -5,7 +5,7 @@ import { ThemeProvider } from '@/lib/contexts/ThemeContext'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'HACK-RUC Chat',
+  title: 'Fairly',
   description: 'Chat interface inspired by Gemini',
 }
 

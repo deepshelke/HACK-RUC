@@ -1,7 +1,7 @@
 # Caffeine Theme Integration Plan
 
 ## Overview
-This document outlines the plan to integrate the Caffeine theme from tweakcn.com into the HACK-RUC frontend application.
+This document outlines the plan to integrate the Caffeine theme from tweakcn.com into the Fairly frontend application.
 
 ## Theme Source
 - **Theme Name**: Caffeine

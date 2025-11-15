@@ -1,7 +1,7 @@
-# Implementation Plan - HACK-RUC Frontend
+# Implementation Plan - Fairly Frontend
 
 ## Overview
-This document outlines the plan for restructuring and enhancing the HACK-RUC frontend with improved architecture, authentication, previous chats, and shadcn/ui integration.
+This document outlines the plan for restructuring and enhancing the Fairly frontend with improved architecture, authentication, previous chats, and shadcn/ui integration.
 
 ## Goals
 1. **Maintainable Architecture**: Create a scalable structure that's easy to modify and extend

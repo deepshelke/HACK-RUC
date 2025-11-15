@@ -22,9 +22,9 @@ interface ChatContextType {
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined)
 
-const LOCAL_STORAGE_KEY = 'hack_ruc_local_chats'
-const LOCAL_STORAGE_MESSAGES_KEY = 'hack_ruc_local_messages'
-const LOCAL_STORAGE_CURRENT_CHAT_KEY = 'hack_ruc_current_chat'
+const LOCAL_STORAGE_KEY = 'fairly_local_chats'
+const LOCAL_STORAGE_MESSAGES_KEY = 'fairly_local_messages'
+const LOCAL_STORAGE_CURRENT_CHAT_KEY = 'fairly_current_chat'
 
 // Helper functions for local storage
 const getLocalChats = (): Chat[] => {
