@@ -1,0 +1,841 @@
+Could get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could get FontBBox from font descriptor because None cannot be parsed as 4 floats
+Could get FontBBox from font descriptor because None cannot be parsed as 4 floats
+======================================================================
+PROCESS ALL FILES AND UPLOAD TO MONGODB
+======================================================================
+
+Initializing chunker...
+Initializing Robust Semantic Chunker...
+✅ Chunker initialized
+
+📁 Found 42 PDF files to process
+
+Connecting to MongoDB...
+✅ Connected to MongoDB successfully!
+✅ Using database: fairly
+✅ Using collection: fairly_chunks
+
+📇 Creating indexes...
+✅ Indexes created successfully!
+
+======================================================================
+PROCESSING FILES
+======================================================================
+
+[1/42] Processing: 1968 Act 5.pdf
+
+============================================================
+Processing: 1968 Act 5.pdf
+============================================================
+   Extracted 30014 chars from 10/10 pages
+   Auto-detected jurisdiction: UNKNOWN
+✅ Extracted 30012 characters from 10 pages
+   ✅ Data retention: 100.2%
+✅ Created 42 chunks
+   Size range: 319 - 2828 chars
+   Average: 714 chars
+   Topics: minimum_wage(18), general(9), hours_worked(5)
+📤 Uploading 42 chunks from 1968 Act 5.pdf...
+   ✅ Successfully uploaded 42 chunks!
+   ✅ File 1: 42 chunks created and uploaded
+
+[2/42] Processing: 2025-0-HB1549P1881.pdf
+
+============================================================
+Processing: 2025-0-HB1549P1881.pdf
+============================================================
+   Extracted 12339 chars from 8/8 pages
+   Auto-detected jurisdiction: UNKNOWN
+✅ Extracted 12337 characters from 8 pages
+   ✅ Data retention: 101.1%
+✅ Created 18 chunks
+   Size range: 293 - 1103 chars
+   Average: 691 chars
+   Topics: minimum_wage(9), general(5), wage_deductions(1)
+📤 Uploading 18 chunks from 2025-0-HB1549P1881.pdf...
+   ✅ Successfully uploaded 18 chunks!
+   ✅ File 2: 18 chunks created and uploaded
+
+[3/42] Processing: 32_.pdf
+
+============================================================
+Processing: 32_.pdf
+============================================================
+   Extracted 43361 chars from 12/12 pages
+   Auto-detected jurisdiction: NJ
+✅ Extracted 43359 characters from 12 pages
+   ✅ Data retention: 99.5%
+✅ Created 64 chunks
+   Size range: 66 - 1859 chars
+   Average: 672 chars
+   Topics: general(31), minimum_wage(25), hours_worked(5)
+📤 Uploading 64 chunks from 32_.pdf...
+   ✅ Successfully uploaded 64 chunks!
+   ✅ File 3: 64 chunks created and uploaded
+
+[4/42] Processing: Complaint Office.pdf
+
+============================================================
+Processing: Complaint Office.pdf
+============================================================
+   Extracted 2056 chars from 3/3 pages
+   Auto-detected jurisdiction: NJ
+✅ Extracted 2054 characters from 3 pages
+   ✅ Data retention: 100.0%
+✅ Created 4 chunks
+   Size range: 341 - 631 chars
+   Average: 512 chars
+   Topics: general(4)
+📤 Uploading 4 chunks from Complaint Office.pdf...
+   ✅ Successfully uploaded 4 chunks!
+   ✅ File 4: 4 chunks created and uploaded
+
+[5/42] Processing: DWBR-contract-templates-10-languages-.pdf
+
+============================================================
+Processing: DWBR-contract-templates-10-languages-.pdf
+============================================================
+   Extracted 115775 chars from 77/77 pages
+   Auto-detected jurisdiction: UNKNOWN
+✅ Extracted 115773 characters from 77 pages
+   ℹ️  Contains tables
+   ℹ️  Contains images
+⚠️  Warning: Only 97.6% data retained. Checking for missing content...
+   ✅ Recovered 1947 characters of missing content
+✅ Created 121 chunks
+   Size range: 313 - 3892 chars
+   Average: 720 chars
+   Topics: general(109), legal_protections(7), written_contract(3)
+📤 Uploading 121 chunks from DWBR-contract-templates-10-languages-.pdf...
+   ✅ Successfully uploaded 121 chunks!
+   ✅ File 5: 121 chunks created and uploaded
+
+[6/42] Processing: Domestic Workers Rights.pdf
+
+============================================================
+Processing: Domestic Workers Rights.pdf
+============================================================
+   Extracted 5428 chars from 7/7 pages
+   Auto-detected jurisdiction: UNKNOWN
+✅ Extracted 5426 characters from 7 pages
+   ✅ Data retention: 104.8%
+✅ Created 10 chunks
+   Size range: 491 - 688 chars
+   Average: 567 chars
+   Topics: written_contract(4), domestic_worker_rights(2), minimum_wage(2)
+📤 Uploading 10 chunks from Domestic Workers Rights.pdf...
+   ✅ Successfully uploaded 10 chunks!
+   ✅ File 6: 10 chunks created and uploaded
+
+[7/42] Processing: Domestic-Worker-Bill-of-Rights-Complaint-Form-English-and-Spanish.pdf
+
+============================================================
+Processing: Domestic-Worker-Bill-of-Rights-Complaint-Form-English-and-Spanish.pdf
+============================================================
+   Extracted 11517 chars from 2/2 pages
+   Auto-detected jurisdiction: PHILADELPHIA
+✅ Extracted 11516 characters from 2 pages
+   ℹ️  Contains tables
+   ℹ️  Contains images
+   ✅ Data retention: 99.4%
+✅ Created 12 chunks
+   Size range: 359 - 1599 chars
+   Average: 767 chars
+   Topics: general(7), legal_protections(2), termination(2)
+📤 Uploading 12 chunks from Domestic-Worker-Bill-of-Rights-Complaint-Form-English-and-Spanish.pdf...
+   ✅ Successfully uploaded 12 chunks!
+   ✅ File 7: 12 chunks created and uploaded
+
+[8/42] Processing: Domestic-Workers-339-Fact-Sheet.pdf
+
+============================================================
+Processing: Domestic-Workers-339-Fact-Sheet.pdf
+============================================================
+   Extracted 6870 chars from 2/2 pages
+   Using jurisdiction: NYC
+✅ Extracted 6868 characters from 2 pages
+   ℹ️  Contains images
+   ✅ Data retention: 99.8%
+✅ Created 11 chunks
+   Size range: 353 - 924 chars
+   Average: 622 chars
+   Topics: discrimination(5), legal_protections(5), minimum_wage(1)
+📤 Uploading 11 chunks from Domestic-Workers-339-Fact-Sheet.pdf...
+   ✅ Successfully uploaded 11 chunks!
+   ✅ File 8: 11 chunks created and uploaded
+
+[9/42] Processing: FY26-Minimum-Wage-Standard-Letter.pdf
+
+============================================================
+Processing: FY26-Minimum-Wage-Standard-Letter.pdf
+============================================================
+   Extracted 2300 chars from 1/1 pages
+   Auto-detected jurisdiction: PHILADELPHIA
+✅ Extracted 2298 characters from 1 pages
+   ℹ️  Contains images
+   ✅ Data retention: 99.9%
+✅ Created 4 chunks
+   Size range: 503 - 712 chars
+   Average: 573 chars
+   Topics: minimum_wage(3), written_contract(1)
+📤 Uploading 4 chunks from FY26-Minimum-Wage-Standard-Letter.pdf...
+   ✅ Successfully uploaded 4 chunks!
+   ✅ File 9: 4 chunks created and uploaded
+
+[10/42] Processing: Fact Sheet # 77A_ Prohibiting Retaliation Under the Fair Labor Standards Act (FLSA) _ U.S. Department of Labor.pdf
+
+============================================================
+Processing: Fact Sheet # 77A_ Prohibiting Retaliation Under the Fair Labor Standards Act (FLSA) _ U.S. Department of Labor.pdf
+============================================================
+   Extracted 3637 chars from 2/2 pages
+   Using jurisdiction: US_FEDERAL
+✅ Extracted 3635 characters from 2 pages
+   ℹ️  Contains images
+   ✅ Data retention: 99.9%
+✅ Created 6 chunks
+   Size range: 245 - 666 chars
+   Average: 540 chars
+   Topics: enforcement(2), retaliation(2), minimum_wage(1)
+📤 Uploading 6 chunks from Fact Sheet # 77A_ Prohibiting Retaliation Under the Fair Labor Standards Act (FLSA) _ U.S. Department of Labor.pdf...
+   ✅ Successfully uploaded 6 chunks!
+   ✅ File 10: 6 chunks created and uploaded
+
+[11/42] Processing: Fact Sheet # 79A_ Companionship Services Under the Fair Labor Standards Act (FLSA) _ U.S. Department of Labor.pdf
+
+============================================================
+Processing: Fact Sheet # 79A_ Companionship Services Under the Fair Labor Standards Act (FLSA) _ U.S. Department of Labor.pdf
+============================================================
+   Extracted 7989 chars from 3/3 pages
+   Auto-detected jurisdiction: US_FEDERAL
+✅ Extracted 7987 characters from 3 pages
+   ℹ️  Contains images
+   ✅ Data retention: 101.2%
+✅ Created 13 chunks
+   Size range: 244 - 707 chars
+   Average: 589 chars
+   Topics: minimum_wage(4), overtime(4), general(4)
+📤 Uploading 13 chunks from Fact Sheet # 79A_ Companionship Services Under the Fair Labor Standards Act (FLSA) _ U.S. Department of Labor.pdf...
+   ✅ Successfully uploaded 13 chunks!
+   ✅ File 11: 13 chunks created and uploaded
+
+[12/42] Processing: Fact Sheet # 79D_ Hours Worked Applicable to Domestic Service Employment Under the Fair Labor Standards Act (FLSA) _ U.S. Department of Labor.pdf
+
+============================================================
+Processing: Fact Sheet # 79D_ Hours Worked Applicable to Domestic Service Employment Under the Fair Labor Standards Act (FLSA) _ U.S. Department of Labor.pdf
+============================================================
+   Extracted 12993 chars from 4/4 pages
+   Auto-detected jurisdiction: US_FEDERAL
+✅ Extracted 12991 characters from 4 pages
+   ℹ️  Contains images
+   ✅ Data retention: 102.0%
+✅ Created 22 chunks
+   Size range: 395 - 697 chars
+   Average: 572 chars
+   Topics: domestic_worker_rights(8), hours_worked(7), minimum_wage(6)
+📤 Uploading 22 chunks from Fact Sheet # 79D_ Hours Worked Applicable to Domestic Service Employment Under the Fair Labor Standards Act (FLSA) _ U.S. Department of Labor.pdf...
+   ✅ Successfully uploaded 22 chunks!
+   ✅ File 12: 22 chunks created and uploaded
+
+[13/42] Processing: Fact Sheet #16_ Deductions From Wages for Uniforms and Other Facilities Under the Fair Labor Standards Act (FLSA) _ U.S. Department of Labor.pdf
+
+============================================================
+Processing: Fact Sheet #16_ Deductions From Wages for Uniforms and Other Facilities Under the Fair Labor Standards Act (FLSA) _ U.S. Department of Labor.pdf
+============================================================
+   Extracted 5200 chars from 2/2 pages
+   Auto-detected jurisdiction: US_FEDERAL
+✅ Extracted 5198 characters from 2 pages
+   ℹ️  Contains images
+   ✅ Data retention: 100.0%
+✅ Created 8 chunks
+   Size range: 394 - 792 chars
+   Average: 610 chars
+   Topics: wage_deductions(5), minimum_wage(3)
+📤 Uploading 8 chunks from Fact Sheet #16_ Deductions From Wages for Uniforms and Other Facilities Under the Fair Labor Standards Act (FLSA) _ U.S. Department of Labor.pdf...
+   ✅ Successfully uploaded 8 chunks!
+   ✅ File 13: 8 chunks created and uploaded
+
+[14/42] Processing: Fact Sheet #22_ Hours Worked Under the Fair Labor Standards Act (FLSA) _ U.S. Department of Labor.pdf
+
+============================================================
+Processing: Fact Sheet #22_ Hours Worked Under the Fair Labor Standards Act (FLSA) _ U.S. Department of Labor.pdf
+============================================================
+   Extracted 7947 chars from 3/3 pages
+   Auto-detected jurisdiction: US_FEDERAL
+✅ Extracted 7945 characters from 3 pages
+   ℹ️  Contains tables
+   ℹ️  Contains images
+   ✅ Data retention: 100.0%
+✅ Created 13 chunks
+   Size range: 501 - 695 chars
+   Average: 575 chars
+   Topics: hours_worked(6), minimum_wage(3), general(2)
+📤 Uploading 13 chunks from Fact Sheet #22_ Hours Worked Under the Fair Labor Standards Act (FLSA) _ U.S. Department of Labor.pdf...
+   ✅ Successfully uploaded 13 chunks!
+   ✅ File 14: 13 chunks created and uploaded
+
+[15/42] Processing: Fact Sheet #23_ Overtime Pay Requirements of the FLSA _ U.S. Department of Labor.pdf
+
+============================================================
+Processing: Fact Sheet #23_ Overtime Pay Requirements of the FLSA _ U.S. Department of Labor.pdf
+============================================================
+   Extracted 6109 chars from 2/2 pages
+   Auto-detected jurisdiction: US_FEDERAL
+✅ Extracted 6107 characters from 2 pages
+   ℹ️  Contains images
+   ✅ Data retention: 100.0%
+✅ Created 10 chunks
+   Size range: 215 - 777 chars
+   Average: 579 chars
+   Topics: overtime(8), minimum_wage(1), general(1)
+📤 Uploading 10 chunks from Fact Sheet #23_ Overtime Pay Requirements of the FLSA _ U.S. Department of Labor.pdf...
+   ✅ Successfully uploaded 10 chunks!
+   ✅ File 15: 10 chunks created and uploaded
+
+[16/42] Processing: Fact Sheet #2_ Restaurants and Fast Food Establishments Under the Fair Labor Standards Act (FLSA) _ U.S. Department of Labor.pdf
+
+============================================================
+Processing: Fact Sheet #2_ Restaurants and Fast Food Establishments Under the Fair Labor Standards Act (FLSA) _ U.S. Department of Labor.pdf
+============================================================
+   Extracted 7359 chars from 2/2 pages
+   Auto-detected jurisdiction: US_FEDERAL
+✅ Extracted 7357 characters from 2 pages
+   ℹ️  Contains tables
+   ℹ️  Contains images
+   ✅ Data retention: 100.0%
+✅ Created 12 chunks
+   Size range: 492 - 727 chars
+   Average: 587 chars
+   Topics: general(4), wage_deductions(4), minimum_wage(3)
+📤 Uploading 12 chunks from Fact Sheet #2_ Restaurants and Fast Food Establishments Under the Fair Labor Standards Act (FLSA) _ U.S. Department of Labor.pdf...
+   ✅ Successfully uploaded 12 chunks!
+   ✅ File 16: 12 chunks created and uploaded
+
+[17/42] Processing: Fact Sheet #43_ Child Labor Provisions of the Fair Labor Standards Act (FLSA) for Nonagricultural Occupations _ U.S. Department of Labor.pdf
+
+============================================================
+Processing: Fact Sheet #43_ Child Labor Provisions of the Fair Labor Standards Act (FLSA) for Nonagricultural Occupations _ U.S. Department of Labor.pdf
+============================================================
+   Extracted 21452 chars from 6/6 pages
+   Auto-detected jurisdiction: US_FEDERAL
+✅ Extracted 21450 characters from 6 pages
+   ℹ️  Contains images
+   ✅ Data retention: 100.8%
+✅ Created 35 chunks
+   Size range: 271 - 783 chars
+   Average: 593 chars
+   Topics: general(25), enforcement(4), minimum_wage(2)
+📤 Uploading 35 chunks from Fact Sheet #43_ Child Labor Provisions of the Fair Labor Standards Act (FLSA) for Nonagricultural Occupations _ U.S. Department of Labor.pdf...
+   ✅ Successfully uploaded 35 chunks!
+   ✅ File 17: 35 chunks created and uploaded
+
+[18/42] Processing: Fact Sheet #44_ Visits to Employers _ U.S. Department of Labor.pdf
+
+============================================================
+Processing: Fact Sheet #44_ Visits to Employers _ U.S. Department of Labor.pdf
+============================================================
+   Extracted 10165 chars from 3/3 pages
+   Auto-detected jurisdiction: US_FEDERAL
+✅ Extracted 10163 characters from 3 pages
+   ✅ Data retention: 99.2%
+✅ Created 16 chunks
+   Size range: 520 - 765 chars
+   Average: 606 chars
+   Topics: enforcement(5), minimum_wage(4), written_contract(2)
+📤 Uploading 16 chunks from Fact Sheet #44_ Visits to Employers _ U.S. Department of Labor.pdf...
+   ✅ Successfully uploaded 16 chunks!
+   ✅ File 18: 16 chunks created and uploaded
+
+[19/42] Processing: Fact Sheet #53 – The Health Care Industry and Hours Worked _ U.S. Department of Labor.pdf
+
+============================================================
+Processing: Fact Sheet #53 – The Health Care Industry and Hours Worked _ U.S. Department of Labor.pdf
+============================================================
+   Extracted 12897 chars from 4/4 pages
+   Auto-detected jurisdiction: US_FEDERAL
+✅ Extracted 12895 characters from 4 pages
+   ℹ️  Contains images
+   ✅ Data retention: 100.7%
+✅ Created 22 chunks
+   Size range: 220 - 721 chars
+   Average: 565 chars
+   Topics: breaks(5), hours_worked(5), minimum_wage(4)
+📤 Uploading 22 chunks from Fact Sheet #53 – The Health Care Industry and Hours Worked _ U.S. Department of Labor.pdf...
+   ✅ Successfully uploaded 22 chunks!
+   ✅ File 19: 22 chunks created and uploaded
+
+[20/42] Processing: Fact Sheet #56A_ Overview of the Regular Rate of Pay Under the Fair Labor Standards Act (FLSA) _ U.S. Department of Labor.pdf
+
+============================================================
+Processing: Fact Sheet #56A_ Overview of the Regular Rate of Pay Under the Fair Labor Standards Act (FLSA) _ U.S. Department of Labor.pdf
+============================================================
+   Extracted 12587 chars from 4/4 pages
+   Auto-detected jurisdiction: US_FEDERAL
+✅ Extracted 12585 characters from 4 pages
+   ℹ️  Contains images
+   ✅ Data retention: 100.0%
+✅ Created 19 chunks
+   Size range: 515 - 784 chars
+   Average: 636 chars
+   Topics: hours_worked(4), general(4), overtime(3)
+📤 Uploading 19 chunks from Fact Sheet #56A_ Overview of the Regular Rate of Pay Under the Fair Labor Standards Act (FLSA) _ U.S. Department of Labor.pdf...
+   ✅ Successfully uploaded 19 chunks!
+   ✅ File 20: 19 chunks created and uploaded
+
+[21/42] Processing: Fact Sheet #79B_ Live-in Domestic Service Workers Under the Fair Labor Standards Act (FLSA) _ U.S. Department of Labor.pdf
+
+============================================================
+Processing: Fact Sheet #79B_ Live-in Domestic Service Workers Under the Fair Labor Standards Act (FLSA) _ U.S. Department of Labor.pdf
+============================================================
+   Extracted 8715 chars from 3/3 pages
+   Auto-detected jurisdiction: US_FEDERAL
+✅ Extracted 8713 characters from 3 pages
+   ℹ️  Contains images
+   ✅ Data retention: 100.0%
+✅ Created 14 chunks
+   Size range: 382 - 794 chars
+   Average: 590 chars
+   Topics: minimum_wage(4), overtime(3), written_contract(3)
+📤 Uploading 14 chunks from Fact Sheet #79B_ Live-in Domestic Service Workers Under the Fair Labor Standards Act (FLSA) _ U.S. Department of Labor.pdf...
+   ✅ Successfully uploaded 14 chunks!
+   ✅ File 21: 14 chunks created and uploaded
+
+[22/42] Processing: Fact Sheet #79_ Private Homes and Domestic Service Employment Under the Fair Labor Standards Act (FLSA) _ U.S. Department of Labor.pdf
+
+============================================================
+Processing: Fact Sheet #79_ Private Homes and Domestic Service Employment Under the Fair Labor Standards Act (FLSA) _ U.S. Department of Labor.pdf
+============================================================
+   Extracted 6303 chars from 2/2 pages
+   Auto-detected jurisdiction: US_FEDERAL
+✅ Extracted 6301 characters from 2 pages
+   ℹ️  Contains images
+   ✅ Data retention: 100.0%
+✅ Created 10 chunks
+   Size range: 384 - 726 chars
+   Average: 595 chars
+   Topics: domestic_worker_rights(4), general(4), written_contract(1)
+📤 Uploading 10 chunks from Fact Sheet #79_ Private Homes and Domestic Service Employment Under the Fair Labor Standards Act (FLSA) _ U.S. Department of Labor.pdf...
+   ✅ Successfully uploaded 10 chunks!
+   ✅ File 22: 10 chunks created and uploaded
+
+[23/42] Processing: Fact Sheet 13_ Employment Relationship Under the Fair Labor Standards Act (FLSA) _ U.S. Department of Labor.pdf
+
+============================================================
+Processing: Fact Sheet 13_ Employment Relationship Under the Fair Labor Standards Act (FLSA) _ U.S. Department of Labor.pdf
+============================================================
+   Extracted 19763 chars from 4/4 pages
+   Auto-detected jurisdiction: US_FEDERAL
+✅ Extracted 19761 characters from 4 pages
+   ℹ️  Contains tables
+   ℹ️  Contains images
+   ✅ Data retention: 101.3%
+✅ Created 32 chunks
+   Size range: 361 - 779 chars
+   Average: 607 chars
+   Topics: written_contract(17), general(10), legal_protections(2)
+📤 Uploading 32 chunks from Fact Sheet 13_ Employment Relationship Under the Fair Labor Standards Act (FLSA) _ U.S. Department of Labor.pdf...
+   ✅ Successfully uploaded 32 chunks!
+   ✅ File 23: 32 chunks created and uploaded
+
+[24/42] Processing: Fair-Workweek-Law.pdf
+
+============================================================
+Processing: Fair-Workweek-Law.pdf
+============================================================
+   Extracted 28752 chars from 7/7 pages
+   Auto-detected jurisdiction: PHILADELPHIA
+✅ Extracted 28750 characters from 7 pages
+   ✅ Data retention: 99.0%
+✅ Created 45 chunks
+   Size range: 364 - 1307 chars
+   Average: 631 chars
+   Topics: legal_protections(8), written_contract(7), general(7)
+📤 Uploading 45 chunks from Fair-Workweek-Law.pdf...
+   ✅ Successfully uploaded 45 chunks!
+   ✅ File 24: 45 chunks created and uploaded
+
+[25/42] Processing: NJ Legislature.pdf
+
+============================================================
+Processing: NJ Legislature.pdf
+============================================================
+   Extracted 134593 chars from 36/36 pages
+   Using jurisdiction: NJ
+✅ Extracted 134591 characters from 36 pages
+   ℹ️  Contains tables
+   ✅ Data retention: 98.6%
+✅ Created 169 chunks
+   Size range: 267 - 3801 chars
+   Average: 765 chars
+   Topics: general(66), minimum_wage(26), legal_protections(18)
+📤 Uploading 169 chunks from NJ Legislature.pdf...
+   ✅ Successfully uploaded 169 chunks!
+   ✅ File 25: 169 chunks created and uploaded
+
+[26/42] Processing: Pennsylvania Code.pdf
+
+============================================================
+Processing: Pennsylvania Code.pdf
+============================================================
+   Extracted 55534 chars from 24/24 pages
+   Auto-detected jurisdiction: UNKNOWN
+✅ Extracted 55532 characters from 24 pages
+   ✅ Data retention: 101.7%
+✅ Created 96 chunks
+   Size range: 317 - 801 chars
+   Average: 582 chars
+   Topics: minimum_wage(42), general(16), overtime(13)
+📤 Uploading 96 chunks from Pennsylvania Code.pdf...
+   ✅ Successfully uploaded 96 chunks!
+   ✅ File 26: 96 chunks created and uploaded
+
+[27/42] Processing: Preamble.pdf
+
+============================================================
+Processing: Preamble.pdf
+============================================================
+   Extracted 19736 chars from 10/10 pages
+   Auto-detected jurisdiction: UNKNOWN
+✅ Extracted 19734 characters from 10 pages
+   ✅ Data retention: 100.3%
+✅ Created 30 chunks
+   Size range: 269 - 1753 chars
+   Average: 659 chars
+   Topics: domestic_worker_rights(7), written_contract(7), general(7)
+📤 Uploading 30 chunks from Preamble.pdf...
+   ✅ Successfully uploaded 30 chunks!
+   ✅ File 27: 30 chunks created and uploaded
+
+[28/42] Processing: Protections-for-Domestic-Workers-Regulations-for-Public-Comment-with-Cover-Letter-10.07.2024.pdf
+
+============================================================
+Processing: Protections-for-Domestic-Workers-Regulations-for-Public-Comment-with-Cover-Letter-10.07.2024.pdf
+============================================================
+   Extracted 69875 chars from 37/37 pages
+   Using jurisdiction: PHILADELPHIA
+✅ Extracted 69873 characters from 37 pages
+   ℹ️  Contains tables
+   ℹ️  Contains images
+   ✅ Data retention: 100.7%
+✅ Created 91 chunks
+   Size range: 303 - 1538 chars
+   Average: 626 chars
+   Topics: written_contract(40), domestic_worker_rights(11), breaks(11)
+📤 Uploading 91 chunks from Protections-for-Domestic-Workers-Regulations-for-Public-Comment-with-Cover-Letter-10.07.2024.pdf...
+   ✅ Successfully uploaded 91 chunks!
+   ✅ File 28: 91 chunks created and uploaded
+
+[29/42] Processing: bllc-updated-regulations.pdf
+
+============================================================
+Processing: bllc-updated-regulations.pdf
+============================================================
+   Extracted 7671 chars from 18/18 pages
+   Auto-detected jurisdiction: UNKNOWN
+✅ Extracted 7669 characters from 18 pages
+   ℹ️  Contains images
+   ✅ Data retention: 100.0%
+✅ Created 11 chunks
+   Size range: 401 - 1114 chars
+   Average: 692 chars
+   Topics: minimum_wage(6), hours_worked(1), wage_deductions(1)
+📤 Uploading 11 chunks from bllc-updated-regulations.pdf...
+   ✅ Successfully uploaded 11 chunks!
+   ✅ File 29: 11 chunks created and uploaded
+
+[30/42] Processing: newyorkcity-ny-1.pdf
+
+============================================================
+Processing: newyorkcity-ny-1.pdf
+============================================================
+   Extracted 9511 chars from 2/2 pages
+   Auto-detected jurisdiction: UNKNOWN
+✅ Extracted 9509 characters from 2 pages
+⚠️  Warning: Only 94.9% data retained. Checking for missing content...
+   ✅ Recovered 417 characters of missing content
+✅ Created 15 chunks
+   Size range: 320 - 1216 chars
+   Average: 628 chars
+   Topics: general(7), legal_protections(4), minimum_wage(2)
+📤 Uploading 15 chunks from newyorkcity-ny-1.pdf...
+   ✅ Successfully uploaded 15 chunks!
+   ✅ File 30: 15 chunks created and uploaded
+
+[31/42] Processing: newyorkcity-ny-2.pdf
+
+============================================================
+Processing: newyorkcity-ny-2.pdf
+============================================================
+   Extracted 18578 chars from 4/4 pages
+   Auto-detected jurisdiction: UNKNOWN
+✅ Extracted 18576 characters from 4 pages
+   ✅ Data retention: 101.1%
+✅ Created 33 chunks
+   Size range: 365 - 787 chars
+   Average: 568 chars
+   Topics: written_contract(17), general(7), enforcement(7)
+📤 Uploading 33 chunks from newyorkcity-ny-2.pdf...
+   ✅ Successfully uploaded 33 chunks!
+   ✅ File 31: 33 chunks created and uploaded
+
+[32/42] Processing: owp-dwbor-model-contract-housecleaners-en.pdf
+
+============================================================
+Processing: owp-dwbor-model-contract-housecleaners-en.pdf
+============================================================
+   Extracted 13725 chars from 8/8 pages
+   Auto-detected jurisdiction: PHILADELPHIA
+✅ Extracted 13723 characters from 8 pages
+   ℹ️  Contains tables
+   ℹ️  Contains images
+⚠️  Warning: Only 97.2% data retained. Checking for missing content...
+   ✅ Recovered 250 characters of missing content
+✅ Created 15 chunks
+   Size range: 250 - 1006 chars
+   Average: 594 chars
+   Topics: written_contract(6), termination(2), minimum_wage(2)
+📤 Uploading 15 chunks from owp-dwbor-model-contract-housecleaners-en.pdf...
+   ✅ Successfully uploaded 15 chunks!
+   ✅ File 32: 15 chunks created and uploaded
+
+[33/42] Processing: owp-dwbor-model-contract-nannies-en.pdf
+
+============================================================
+Processing: owp-dwbor-model-contract-nannies-en.pdf
+============================================================
+   Extracted 13430 chars from 8/8 pages
+   Auto-detected jurisdiction: PHILADELPHIA
+✅ Extracted 13428 characters from 8 pages
+   ℹ️  Contains tables
+   ℹ️  Contains images
+⚠️  Warning: Only 97.3% data retained. Checking for missing content...
+   ✅ Recovered 244 characters of missing content
+✅ Created 15 chunks
+   Size range: 244 - 1313 chars
+   Average: 612 chars
+   Topics: written_contract(6), termination(2), minimum_wage(2)
+📤 Uploading 15 chunks from owp-dwbor-model-contract-nannies-en.pdf...
+   ✅ Successfully uploaded 15 chunks!
+   ✅ File 33: 15 chunks created and uploaded
+
+[34/42] Processing: owp-dwbor-notice-poster-en.pdf
+
+============================================================
+Processing: owp-dwbor-notice-poster-en.pdf
+============================================================
+   Extracted 798 chars from 1/1 pages
+   Auto-detected jurisdiction: UNKNOWN
+✅ Extracted 796 characters from 1 pages
+   ℹ️  Contains images
+   ✅ Data retention: 100.0%
+✅ Created 2 chunks
+   Size range: 143 - 652 chars
+   Average: 397 chars
+   Topics: termination(1), retaliation(1)
+📤 Uploading 2 chunks from owp-dwbor-notice-poster-en.pdf...
+   ✅ Successfully uploaded 2 chunks!
+   ✅ File 34: 2 chunks created and uploaded
+
+[35/42] Processing: owp-power-act-ordinance-2025.pdf
+
+============================================================
+Processing: owp-power-act-ordinance-2025.pdf
+============================================================
+   Extracted 108761 chars from 44/44 pages
+   Auto-detected jurisdiction: PHILADELPHIA
+✅ Extracted 108759 characters from 44 pages
+   ℹ️  Contains images
+   ✅ Data retention: 99.9%
+✅ Created 165 chunks
+   Size range: 300 - 1762 chars
+   Average: 656 chars
+   Topics: enforcement(58), legal_protections(24), written_contract(16)
+📤 Uploading 165 chunks from owp-power-act-ordinance-2025.pdf...
+   ✅ Successfully uploaded 165 chunks!
+   ✅ File 35: 165 chunks created and uploaded
+
+[36/42] Processing: p712-2-20.pdf
+
+============================================================
+Processing: p712-2-20.pdf
+============================================================
+   Extracted 5335 chars from 2/2 pages
+   Using jurisdiction: NY
+✅ Extracted 5333 characters from 2 pages
+   ℹ️  Contains images
+   ✅ Data retention: 100.0%
+✅ Created 10 chunks
+   Size range: 182 - 733 chars
+   Average: 532 chars
+   Topics: minimum_wage(3), discrimination(2), wage_deductions(2)
+📤 Uploading 10 chunks from p712-2-20.pdf...
+   ✅ Successfully uploaded 10 chunks!
+   ✅ File 36: 10 chunks created and uploaded
+
+[37/42] Processing: philadelphia-pa-1.pdf
+
+============================================================
+Processing: philadelphia-pa-1.pdf
+============================================================
+   Extracted 3798 chars from 1/1 pages
+   Using jurisdiction: PHILADELPHIA
+✅ Extracted 3796 characters from 1 pages
+⚠️  Warning: Only 92.9% data retained. Checking for missing content...
+   ✅ Recovered 259 characters of missing content
+✅ Created 7 chunks
+   Size range: 259 - 815 chars
+   Average: 540 chars
+   Topics: written_contract(4), domestic_worker_rights(2), minimum_wage(1)
+📤 Uploading 7 chunks from philadelphia-pa-1.pdf...
+   ✅ Successfully uploaded 7 chunks!
+   ✅ File 37: 7 chunks created and uploaded
+
+[38/42] Processing: wage-theft-prevention-act-frequently-asked-questions_0.pdf
+
+============================================================
+Processing: wage-theft-prevention-act-frequently-asked-questions_0.pdf
+============================================================
+   Extracted 11721 chars from 6/6 pages
+   Auto-detected jurisdiction: UNKNOWN
+✅ Extracted 11719 characters from 6 pages
+   ✅ Data retention: 101.1%
+✅ Created 21 chunks
+   Size range: 153 - 1014 chars
+   Average: 561 chars
+   Topics: minimum_wage(5), general(5), retaliation(4)
+📤 Uploading 21 chunks from wage-theft-prevention-act-frequently-asked-questions_0.pdf...
+   ✅ Successfully uploaded 21 chunks!
+   ✅ File 38: 21 chunks created and uploaded
+
+[39/42] Processing: wcms_104700.pdf
+
+============================================================
+Processing: wcms_104700.pdf
+============================================================
+   Extracted 431569 chars from 134/134 pages
+   Auto-detected jurisdiction: UNKNOWN
+✅ Extracted 431568 characters from 134 pages
+   ℹ️  Contains tables
+   ✅ Data retention: 99.9%
+✅ Created 630 chunks
+   Size range: 319 - 5200 chars
+   Average: 638 chars
+   Topics: domestic_worker_rights(225), legal_protections(122), written_contract(99)
+📤 Uploading 630 chunks from wcms_104700.pdf...
+   ✅ Successfully uploaded 630 chunks!
+   ✅ File 39: 630 chunks created and uploaded
+
+[40/42] Processing: wcms_161104.pdf
+
+============================================================
+Processing: wcms_161104.pdf
+============================================================
+   Extracted 10354 chars from 4/4 pages
+   Auto-detected jurisdiction: UNKNOWN
+✅ Extracted 10352 characters from 4 pages
+   ℹ️  Contains images
+   ✅ Data retention: 102.0%
+✅ Created 15 chunks
+   Size range: 404 - 1989 chars
+   Average: 694 chars
+   Topics: legal_protections(4), domestic_worker_rights(4), minimum_wage(2)
+📤 Uploading 15 chunks from wcms_161104.pdf...
+   ✅ Successfully uploaded 15 chunks!
+   ✅ File 40: 15 chunks created and uploaded
+
+[41/42] Processing: wcms_168217.pdf
+
+============================================================
+Processing: wcms_168217.pdf
+============================================================
+   Extracted 1736 chars from 1/1 pages
+   Auto-detected jurisdiction: UNKNOWN
+✅ Extracted 1734 characters from 1 pages
+   ✅ Data retention: 100.0%
+✅ Created 3 chunks
+   Size range: 516 - 603 chars
+   Average: 557 chars
+   Topics: general(3)
+📤 Uploading 3 chunks from wcms_168217.pdf...
+   ✅ Successfully uploaded 3 chunks!
+   ✅ File 41: 3 chunks created and uploaded
+
+[42/42] Processing: wh1282.pdf
+
+============================================================
+Processing: wh1282.pdf
+============================================================
+   Extracted 33014 chars from 22/28 pages
+   Auto-detected jurisdiction: US_FEDERAL
+✅ Extracted 33012 characters from 22 pages
+   ✅ Data retention: 98.6%
+✅ Created 53 chunks
+   Size range: 271 - 1907 chars
+   Average: 609 chars
+   Topics: overtime(19), minimum_wage(7), enforcement(7)
+📤 Uploading 53 chunks from wh1282.pdf...
+   ✅ Successfully uploaded 53 chunks!
+   ✅ File 42: 53 chunks created and uploaded
+
+======================================================================
+PROCESSING COMPLETE
+======================================================================
+✅ Total files processed: 42/42
+⚠️  Files skipped: 0
+❌ Files with errors: 0
+📤 Total chunks uploaded: 1944
+📊 Total chunks in MongoDB: 1944
+
+📊 STATISTICS:
+   Total chunks: 1944
+   Size range: 66 - 5200 chars
+   Average: 646 chars
+   Unique IDs: 1944/1944
+   ✅ NO COLLISIONS - All IDs are unique!
+
+   Topic distribution (top 5):
+     general: 415 chunks
+     domestic_worker_rights: 297 chunks
+     written_contract: 267 chunks
+     minimum_wage: 264 chunks
+     legal_protections: 218 chunks
+
+   Jurisdiction distribution:
+     NJ: 237 chunks
+     NY: 10 chunks
+     NYC: 11 chunks
+     PHILADELPHIA: 354 chunks
+     UNKNOWN: 1047 chunks
+     US_FEDERAL: 285 chunks
+
+✅ Processing complete! Log saved to: /Users/deepshelke/Desktop/HACK-RUC/data-preprocessing/processing_log.txt
+======================================================================
