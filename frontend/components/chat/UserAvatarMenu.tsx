@@ -1,12 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/contexts/AuthContext'
 import { useTheme, type ThemeName } from '@/lib/contexts/ThemeContext'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { LogOut, LogIn, Moon, Sun, User, Check } from 'lucide-react'
+import { Moon, Sun, User, Check } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,24 +19,9 @@ import {
 } from '@/components/ui/dropdown-menu'
 
 export default function UserAvatarMenu() {
-  const router = useRouter()
-  const { user, logout, isAuthenticated } = useAuth()
+  const { user, isAuthenticated } = useAuth()
   const { themeName, themeMode, setTheme, toggleMode } = useTheme()
   const [open, setOpen] = useState(false)
-
-  const handleLogout = async () => {
-    try {
-      await logout()
-      setOpen(false)
-    } catch (error) {
-      console.error('Logout failed:', error)
-    }
-  }
-
-  const handleLogin = () => {
-    router.push('/login')
-    setOpen(false)
-  }
 
   const handleThemeSelect = (name: ThemeName) => {
     setTheme(name, themeMode)
@@ -135,20 +119,6 @@ export default function UserAvatarMenu() {
               </>
             )}
           </DropdownMenuItem>
-          
-          <DropdownMenuSeparator />
-          
-          {isAuthenticated ? (
-            <DropdownMenuItem onClick={handleLogout}>
-              <LogOut className="mr-2 h-4 w-4" />
-              <span>Sign out</span>
-            </DropdownMenuItem>
-          ) : (
-            <DropdownMenuItem onClick={handleLogin}>
-              <LogIn className="mr-2 h-4 w-4" />
-              <span>Sign in</span>
-            </DropdownMenuItem>
-          )}
         </DropdownMenuContent>
       </div>
     </DropdownMenu>

@@ -13,7 +13,6 @@ import {
   Copy, 
   MessageSquare, 
   Trash2, 
-  Settings,
   ChevronLeft,
   ChevronRight
 } from 'lucide-react'
@@ -94,15 +93,6 @@ export default function ChatSidebar({ collapsed = false, onToggleCollapse }: Cha
             ))}
           </div>
         </ScrollArea>
-        <Separator className="mb-4" />
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="h-9 w-9"
-          title="Settings and help"
-        >
-          <Settings className="h-5 w-5" />
-        </Button>
       </div>
     )
   }
@@ -186,17 +176,6 @@ export default function ChatSidebar({ collapsed = false, onToggleCollapse }: Cha
             </div>
           )}
         </ScrollArea>
-      </div>
-
-      {/* Settings at Bottom */}
-      <div className="border-t border-sidebar-border p-3">
-        <Button 
-          variant="ghost" 
-          className="w-full justify-start gap-2 h-9 text-sm"
-        >
-          <Settings className="h-4 w-4" />
-          <span>Settings and help</span>
-        </Button>
       </div>
     </div>
   )
