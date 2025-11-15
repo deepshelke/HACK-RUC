@@ -25,26 +25,35 @@ from typing import Dict, List, Optional, Tuple
 load_dotenv(Path(__file__).parent.parent / ".env")
 
 # MongoDB connection details
-MONGODB_USERNAME = os.getenv('MONGODB_USERNAME', 'deep')
-MONGODB_PASSWORD = os.getenv('MONGODB_PASSWORD', 'deepshelke123')
-MONGODB_CLUSTER = os.getenv('MONGODB_CLUSTER', 'cluster1.hupax8i.mongodb.net')
-MONGODB_APP_NAME = os.getenv('MONGODB_APP_NAME', 'Cluster1')
-DATABASE_NAME = os.getenv('MONGODB_DATABASE', 'fairly')
-COLLECTION_NAME = os.getenv('MONGODB_COLLECTION', 'fairly_chunks')
+MONGODB_USERNAME = os.getenv('MONGODB_USERNAME')
+MONGODB_PASSWORD = os.getenv('MONGODB_PASSWORD')
+MONGODB_CLUSTER = os.getenv('MONGODB_CLUSTER')
+MONGODB_APP_NAME = os.getenv('MONGODB_APP_NAME')
+DATABASE_NAME = os.getenv('MONGODB_DATABASE')  # Uses MONGODB_DATABASE from .env
+COLLECTION_NAME = os.getenv('MONGODB_COLLECTION')  # Uses MONGODB_COLLECTION from .env
 
 # Gemini API
-GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', 'AIzaSyCcxXRDJhJVmP446PTRsErjZ3NP7Obpy6o')
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
 
 # Pinecone API
-PINECONE_API_KEY = os.getenv('PINECONE_API_KEY', 'pcsk_2N3E6V_QHopkTxvTXj957o8w1eCYPyzm9RH3KgGrsfySya3fqwwmX9sWE2znGijnbt1LeH')
-PINECONE_INDEX_NAME = os.getenv('PINECONE_INDEX_NAME', 'domestic-worker-rights')
+PINECONE_API_KEY = os.getenv('PINECONE_API_KEY')
+PINECONE_INDEX_NAME = os.getenv('PINECONE_INDEX_NAME')
 
-# Configuration
-EMBEDDING_MODEL = "text-embedding-005"  # Gemini embedding model
-EMBEDDING_DIMENSION = 3072
-GEMINI_MODEL = "gemini-1.5-pro"  # For text generation
-TOP_K_RESULTS = 5  # Number of chunks to retrieve
-SIMILARITY_THRESHOLD = 0.7  # Minimum similarity score
+# Configuration - all from environment variables
+EMBEDDING_MODEL = os.getenv('EMBEDDING_MODEL', 'gemini-embedding-exp-03-07')  # Gemini embedding model
+EMBEDDING_DIMENSION = int(os.getenv('EMBEDDING_DIMENSION', '3072'))  # Embedding dimension
+GEMINI_MODEL = os.getenv('GEMINI_MODEL', 'gemini-2.0-flash-exp')  # For text generation (Flash model for faster responses)
+TOP_K_RESULTS = int(os.getenv('TOP_K_RESULTS', '8'))  # Number of chunks to retrieve
+SIMILARITY_THRESHOLD = float(os.getenv('SIMILARITY_THRESHOLD', '0.65'))  # Minimum similarity score (reduced for better recall)
+
+# Validate required environment variables
+required_vars = [
+    'MONGODB_USERNAME', 'MONGODB_PASSWORD', 'MONGODB_CLUSTER', 'MONGODB_APP_NAME',
+    'MONGODB_DATABASE', 'MONGODB_COLLECTION', 'GEMINI_API_KEY', 'PINECONE_API_KEY', 'PINECONE_INDEX_NAME'
+]
+missing_vars = [var for var in required_vars if not os.getenv(var)]
+if missing_vars:
+    raise ValueError(f"Missing required environment variables: {', '.join(missing_vars)}")
 
 # Supported jurisdictions
 JURISDICTIONS = {
@@ -112,14 +121,26 @@ class Layer1_Processor:
         Refine user query into a better search prompt using AI.
         """
         system_prompt = """You are a query refinement assistant for a domestic worker rights search system.
-Your task is to convert user queries into optimized search prompts that will retrieve relevant information.
+Your task is to convert user queries into optimized search prompts.
+
+Domain Context: This system contains legal documents about:
+- Fair Labor Standards Act (FLSA)
+- Minimum wage laws
+- Overtime regulations
+- Worker protections
+- State and federal labor laws
+- Domestic worker rights and protections
+- Retaliation protections
+- Wage and hour regulations
 
 Guidelines:
-1. Preserve the core intent of the user's question
-2. Expand abbreviations and clarify ambiguous terms
-3. Add relevant context about domestic worker rights if needed
-4. Make the query more specific and searchable
-5. Keep it concise (1-2 sentences max)
+1. Expand legal abbreviations (FLSA → Fair Labor Standards Act)
+2. Add jurisdiction context if missing
+3. Convert questions to searchable statements
+4. Include relevant legal terminology
+5. Preserve the core intent of the user's question
+6. Make the query more specific and searchable
+7. Keep it concise (1-2 sentences max)
 
 User Query: {query}
 Jurisdiction: {jurisdiction}
@@ -149,7 +170,8 @@ Refined Search Prompt:"""
     
     def generate_embedding(self, text: str) -> List[float]:
         """
-        Generate 3072-dimensional embedding using Gemini text-embedding-005.
+        Generate 3072-dimensional embedding using Gemini gemini-embedding-exp-03-07.
+        Must match the model used for generating document embeddings.
         """
         try:
             result = genai.embed_content(
@@ -192,14 +214,16 @@ Refined Search Prompt:"""
         print("="*70)
         
         # Step 1: Check if jurisdiction clarification needed
-        needs_clarification, detected_jurisdiction = self.detect_jurisdiction_need(query)
-        
-        if needs_clarification and jurisdiction is None:
-            print("   📍 Jurisdiction clarification needed")
-            return None, self.ask_jurisdiction(), None
-        
-        # Use provided jurisdiction or detected one
-        final_jurisdiction = jurisdiction or detected_jurisdiction
+        # Only check query if jurisdiction is NOT already provided
+        if jurisdiction is None:
+            needs_clarification, detected_jurisdiction = self.detect_jurisdiction_need(query)
+            if needs_clarification:
+                print("   📍 Jurisdiction clarification needed")
+                return None, self.ask_jurisdiction(), None
+            final_jurisdiction = detected_jurisdiction
+        else:
+            # Use provided jurisdiction directly - no need to check query
+            final_jurisdiction = jurisdiction
         
         # Step 2: Refine prompt
         print(f"   🔧 Refining prompt...")
@@ -279,8 +303,21 @@ class Layer2_Search:
             # Build filter if jurisdiction specified
             filter_dict = {}
             if jurisdiction:
-                filter_dict = {"jurisdiction": jurisdiction.lower()}
-                print(f"   🔍 Searching with jurisdiction filter: {jurisdiction}")
+                # Normalize jurisdiction to lowercase to match MongoDB storage format
+                # MongoDB stores jurisdiction as lowercase (e.g., "us_federal", "ny", "nj")
+                normalized_jurisdiction = jurisdiction.lower()
+                # Map jurisdiction values to match what's stored in MongoDB
+                jurisdiction_map = {
+                    "us_federal": "us_federal",
+                    "ny": "ny",
+                    "nyc": "nyc", 
+                    "nj": "nj",
+                    "philadelphia": "philadelphia"
+                }
+                # Use mapped value or original lowercase
+                filter_value = jurisdiction_map.get(normalized_jurisdiction, normalized_jurisdiction)
+                filter_dict = {"jurisdiction": filter_value}
+                print(f"   🔍 Searching with jurisdiction filter: {filter_value}")
             
             # Query Pinecone
             print(f"   🔎 Querying Pinecone (top_k={top_k})...")
@@ -441,9 +478,14 @@ User Question: {query}
 Instructions:
 1. Answer based ONLY on the provided context
 2. Cite the source document when possible
-3. Be accurate and specific
-4. If information is not available, clearly state that
-5. Use clear, professional language
+3. Be accurate and specific - include exact dollar amounts, percentages, numbers, and dates when mentioned in the context
+4. If asking about wages, salaries, or monetary amounts:
+   - Include the specific USD dollar amounts if available in the context
+   - If specific amounts are not in the context, clearly state: "The specific dollar amount is not provided in the available documents"
+   - Provide any related information that IS available (e.g., "must be paid at least minimum wage", "overtime rates", etc.)
+   - Suggest contacting the relevant labor department or official source for current specific amounts
+5. If information is not available, clearly state that and provide helpful next steps
+6. Use clear, professional language
 
 Answer:"""
 
@@ -525,7 +567,18 @@ class SearchEngine:
             normalized_jurisdiction = None
             if jurisdiction:
                 jurisdiction_lower = jurisdiction.lower()
+                # Try to get from JURISDICTIONS mapping first
                 normalized_jurisdiction = JURISDICTIONS.get(jurisdiction_lower)
+                
+                # If not found in mapping, check if it's already in normalized format
+                if not normalized_jurisdiction:
+                    # Handle formats like 'us_federal', 'ny', 'nj', etc. directly
+                    jurisdiction_upper = jurisdiction.upper()
+                    if jurisdiction_upper in ['US_FEDERAL', 'NY', 'NYC', 'NJ', 'PHILADELPHIA']:
+                        normalized_jurisdiction = jurisdiction_upper
+                    # Also handle lowercase versions
+                    elif jurisdiction_lower in ['us_federal', 'ny', 'nyc', 'nj', 'philadelphia']:
+                        normalized_jurisdiction = jurisdiction_upper
             
             # LAYER 1: Process query and generate embedding
             embedding, refined_prompt, detected_jurisdiction = self.layer1.process(
@@ -597,19 +650,31 @@ def main():
     print("\n" + "="*70)
     print("DOMESTIC WORKER RIGHTS SEARCH ENGINE")
     print("="*70)
-    print("\nType your questions about domestic worker rights.")
+    print("\nWelcome! To provide accurate information, we need to know your jurisdiction.")
     print("Type 'quit' or 'exit' to stop.\n")
     
     # Initialize search engine
     engine = SearchEngine()
     
     # Track conversation state
+    current_jurisdiction = None
     pending_jurisdiction = None
+    is_new_chat = True
+    
+    # Ask for jurisdiction at the start of new chat
+    print("📍 Please specify your jurisdiction:")
+    print("   Options: US Federal, NY (New York State), NYC (New York City), NJ (New Jersey), or Philadelphia")
+    print("   You can also type 'change' later to switch jurisdictions.\n")
     
     while True:
         try:
             # Get user input
-            user_input = input("\n🔍 Your question: ").strip()
+            if is_new_chat or current_jurisdiction is None:
+                prompt = "📍 Select jurisdiction (US Federal/NY/NYC/NJ/Philadelphia): "
+            else:
+                prompt = f"\n🔍 Your question (jurisdiction: {current_jurisdiction}): "
+            
+            user_input = input(prompt).strip()
             
             if user_input.lower() in ['quit', 'exit', 'q']:
                 print("\n👋 Goodbye!")
@@ -618,7 +683,30 @@ def main():
             if not user_input:
                 continue
             
-            # Check if this is a jurisdiction response
+            # Handle jurisdiction selection or change
+            if is_new_chat or current_jurisdiction is None or user_input.lower() == 'change':
+                jurisdiction_input = user_input.lower() if user_input.lower() != 'change' else None
+                
+                if user_input.lower() == 'change':
+                    print("\n📍 Change jurisdiction to:")
+                    print("   Options: US Federal, NY, NYC, NJ, or Philadelphia")
+                    jurisdiction_input = input("   New jurisdiction: ").strip().lower()
+                
+                normalized = JURISDICTIONS.get(jurisdiction_input) if jurisdiction_input else None
+                
+                if normalized:
+                    current_jurisdiction = normalized
+                    is_new_chat = False
+                    print(f"✅ Jurisdiction set to: {current_jurisdiction}")
+                    print("   You can now ask your questions!\n")
+                    continue
+                else:
+                    print("⚠️  Please specify a valid jurisdiction: US Federal, NY, NYC, NJ, or Philadelphia")
+                    if is_new_chat:
+                        continue
+                    # If changing jurisdiction failed, continue with current one
+            
+            # Check if this is a jurisdiction response for a pending query
             if pending_jurisdiction:
                 # User is responding to jurisdiction question
                 jurisdiction_input = user_input.lower()
@@ -632,8 +720,8 @@ def main():
                     print("⚠️  Please specify a valid jurisdiction: US Federal, NY, NYC, NJ, or Philadelphia")
                     continue
             else:
-                # Normal query
-                result = engine.search(user_input)
+                # Normal query - use current jurisdiction
+                result = engine.search(user_input, current_jurisdiction)
             
             # Handle result
             if result.get("needs_clarification"):

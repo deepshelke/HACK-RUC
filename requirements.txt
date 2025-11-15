@@ -1,0 +1,16 @@
+# Universal Requirements for HACK-RUC Domestic Worker Rights RAG System
+# This file contains all dependencies needed for the entire project
+
+# Database & Vector Store
+pymongo>=4.6.0
+pinecone-client>=3.0.0
+
+# Environment Variables
+python-dotenv>=1.0.0
+
+# AI/ML - Google Gemini API
+google-generativeai>=0.3.0
+
+# PDF Processing
+pdfplumber>=0.10.0
+
