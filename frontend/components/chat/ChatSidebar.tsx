@@ -60,7 +60,7 @@ export default function ChatSidebar({ collapsed = false, onToggleCollapse }: Cha
 
   if (collapsed) {
     return (
-      <div className="flex flex-col h-full bg-background border-r items-center py-3">
+      <div className="flex flex-col h-full bg-sidebar border-r border-sidebar-border items-center py-3">
         <Button 
           variant="ghost" 
           size="icon" 
@@ -108,9 +108,9 @@ export default function ChatSidebar({ collapsed = false, onToggleCollapse }: Cha
   }
 
   return (
-    <div className="flex flex-col h-full bg-background">
+    <div className="flex flex-col h-full bg-sidebar border-r border-sidebar-border">
       {/* Top Icons */}
-      <div className="flex items-center justify-between p-3 border-b">
+      <div className="flex items-center justify-between p-3 border-b border-sidebar-border">
         <Button 
           variant="ghost" 
           size="icon" 
@@ -122,10 +122,10 @@ export default function ChatSidebar({ collapsed = false, onToggleCollapse }: Cha
       </div>
 
       {/* New Chat Button */}
-      <div className="p-3 border-b">
+      <div className="p-3 border-b border-sidebar-border">
         <Button 
           onClick={handleCreateChat} 
-          className="w-full justify-start gap-2 h-10"
+          className="w-full justify-start gap-2 h-9 bg-sidebar-accent hover:bg-sidebar-accent/80 text-sidebar-accent-foreground"
           variant="ghost"
         >
           <div className="relative">
@@ -138,16 +138,16 @@ export default function ChatSidebar({ collapsed = false, onToggleCollapse }: Cha
 
       {/* Recent Chats */}
       <div className="flex-1 overflow-hidden flex flex-col">
-        <div className="p-3 border-b">
-          <h2 className="text-xs font-semibold text-muted-foreground px-2">Recent</h2>
+        <div className="p-3 border-b border-sidebar-border">
+          <h2 className="text-xs font-medium text-sidebar-foreground/60 px-2 uppercase tracking-wider">Recent</h2>
         </div>
         <ScrollArea className="flex-1">
           {isLoading && chats.length === 0 ? (
-            <div className="p-4 text-center text-muted-foreground text-sm">
+            <div className="p-4 text-center text-sidebar-foreground/70 text-sm">
               Loading chats...
             </div>
           ) : chats.length === 0 ? (
-            <div className="p-4 text-center text-muted-foreground">
+            <div className="p-4 text-center text-sidebar-foreground/70">
               <MessageSquare className="h-8 w-8 mx-auto mb-2 opacity-50" />
               <p className="text-sm">No chats yet</p>
             </div>
@@ -158,16 +158,16 @@ export default function ChatSidebar({ collapsed = false, onToggleCollapse }: Cha
                   key={chat.id}
                   onClick={() => handleSelectChat(chat.id)}
                   className={`
-                    group relative p-2.5 rounded-lg cursor-pointer transition-colors mb-1
+                    group relative px-3 py-2 rounded-md cursor-pointer transition-colors mb-0.5
                     ${currentChat?.id === chat.id
-                      ? 'bg-muted'
-                      : 'hover:bg-muted/50'
+                      ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                      : 'hover:bg-muted/30 text-sidebar-foreground'
                     }
                   `}
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-medium text-sm truncate leading-tight">
+                      <h3 className="font-normal text-sm truncate leading-snug">
                         {chat.title}
                       </h3>
                     </div>
@@ -189,7 +189,7 @@ export default function ChatSidebar({ collapsed = false, onToggleCollapse }: Cha
       </div>
 
       {/* Settings at Bottom */}
-      <div className="border-t p-3">
+      <div className="border-t border-sidebar-border p-3">
         <Button 
           variant="ghost" 
           className="w-full justify-start gap-2 h-9 text-sm"

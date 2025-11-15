@@ -18,8 +18,8 @@ export default function ChatMessage({ message }: ChatMessageProps) {
         isUser ? 'flex-row-reverse space-x-reverse' : ''
       }`}
     >
-      <Avatar className="h-8 w-8">
-        <AvatarFallback className={isUser ? 'bg-primary text-primary-foreground' : 'bg-gradient-to-br from-blue-500 to-purple-600 text-white'}>
+      <Avatar className="h-8 w-8 border border-border">
+        <AvatarFallback className={isUser ? 'bg-primary text-primary-foreground' : 'bg-primary/20 text-primary border border-primary/30'}>
           {isUser ? (
             <User className="h-4 w-4" />
           ) : (
@@ -33,10 +33,10 @@ export default function ChatMessage({ message }: ChatMessageProps) {
         }`}
       >
         <div
-          className={`rounded-2xl px-4 py-3 ${
+          className={`rounded-md px-4 py-2.5 ${
             isUser
-              ? 'bg-primary text-primary-foreground rounded-tr-sm'
-              : 'bg-muted text-foreground rounded-tl-sm'
+              ? 'bg-primary text-primary-foreground'
+              : 'bg-card text-foreground border border-border'
           }`}
         >
           <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">

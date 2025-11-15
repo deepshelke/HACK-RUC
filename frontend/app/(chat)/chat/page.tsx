@@ -30,7 +30,7 @@ export default function ChatPage() {
   return (
     <div className="flex h-screen bg-background overflow-hidden">
       {/* Permanent Sidebar - Desktop */}
-      <div className={`hidden md:flex ${sidebarCollapsed ? 'w-16' : 'md:w-64 lg:w-72'} flex-col border-r bg-muted/30 transition-all duration-300`}>
+      <div className={`hidden md:flex ${sidebarCollapsed ? 'w-16' : 'md:w-64 lg:w-72'} flex-col border-r border-sidebar-border bg-sidebar transition-all duration-300`}>
         <ChatSidebar 
           collapsed={sidebarCollapsed} 
           onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)} 
@@ -49,10 +49,10 @@ export default function ChatPage() {
             <div className="flex flex-col items-center justify-center h-full px-4">
               {/* Personalized Greeting */}
               <div className="mb-8 text-center">
-                <h1 className="text-4xl font-semibold mb-2 bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
+                <h1 className="text-4xl font-semibold mb-2 bg-gradient-to-r from-primary via-primary to-primary/80 bg-clip-text text-transparent">
                   Hello, {user?.name?.split(' ')[0] || 'there'}
                 </h1>
-                <p className="text-muted-foreground text-lg">
+                <p className="text-muted-foreground text-base">
                   How can I help you today?
                 </p>
               </div>
@@ -70,8 +70,8 @@ export default function ChatPage() {
                 ))}
                 {isSending && (
                   <div className="flex items-start space-x-3">
-                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                      <Sparkles className="w-5 h-5 text-white" />
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary flex items-center justify-center">
+                      <Sparkles className="w-5 h-5 text-primary-foreground" />
                     </div>
                     <div className="flex-1">
                       <div className="flex space-x-1 pt-2">

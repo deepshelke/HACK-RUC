@@ -42,7 +42,7 @@ export default function ChatInput({ onSendMessage, disabled, showSuggestions = t
   return (
     <div className="w-full max-w-3xl mx-auto px-4 py-6">
       <form onSubmit={handleSubmit} className="relative">
-        <div className="flex items-end gap-2 bg-muted rounded-3xl border border-border focus-within:border-primary/50 transition-colors px-4 py-3">
+        <div className="flex items-end gap-2 bg-card border border-border rounded-md focus-within:border-primary/50 focus-within:ring-1 focus-within:ring-primary/20 transition-all px-4 py-2.5">
           {/* Text Input */}
           <textarea
             ref={textareaRef}

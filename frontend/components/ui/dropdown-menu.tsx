@@ -11,8 +11,23 @@ const DropdownMenuContext = React.createContext<DropdownMenuContextType>({
   setOpen: () => {},
 })
 
-const DropdownMenu = ({ children }: { children: React.ReactNode }) => {
-  const [open, setOpen] = React.useState(false)
+const DropdownMenu = ({ 
+  children, 
+  open: controlledOpen,
+  onOpenChange 
+}: { 
+  children: React.ReactNode
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
+}) => {
+  const [internalOpen, setInternalOpen] = React.useState(false)
+  const open = controlledOpen !== undefined ? controlledOpen : internalOpen
+  const setOpen = (newOpen: boolean) => {
+    if (controlledOpen === undefined) {
+      setInternalOpen(newOpen)
+    }
+    onOpenChange?.(newOpen)
+  }
 
   return (
     <DropdownMenuContext.Provider value={{ open, setOpen }}>
@@ -52,21 +67,22 @@ DropdownMenuTrigger.displayName = "DropdownMenuTrigger"
 const DropdownMenuContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & { align?: "start" | "end" }
->(({ className, align = "start", children, ...props }, ref) => {
+>(({ className, align = "end", children, ...props }, ref) => {
   const { open, setOpen } = React.useContext(DropdownMenuContext)
 
   if (!open) return null
 
   return (
-    <div
-      className="fixed inset-0 z-50"
-      onClick={() => setOpen(false)}
-    >
+    <>
+      <div
+        className="fixed inset-0 z-40"
+        onClick={() => setOpen(false)}
+      />
       <div
         ref={ref}
         className={cn(
           "absolute z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md",
-          align === "end" ? "right-0" : "left-0",
+          align === "end" ? "right-0 top-full mt-1" : "left-0 top-full mt-1",
           className
         )}
         onClick={(e) => e.stopPropagation()}
@@ -74,7 +90,7 @@ const DropdownMenuContent = React.forwardRef<
       >
         {children}
       </div>
-    </div>
+    </>
   )
 })
 DropdownMenuContent.displayName = "DropdownMenuContent"
@@ -99,5 +115,29 @@ const DropdownMenuItem = React.forwardRef<
 })
 DropdownMenuItem.displayName = "DropdownMenuItem"
 
-export { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem }
+const DropdownMenuLabel = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn("px-2 py-1.5 text-sm font-semibold", className)}
+    {...props}
+  />
+))
+DropdownMenuLabel.displayName = "DropdownMenuLabel"
+
+const DropdownMenuSeparator = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn("-mx-1 my-1 h-px bg-muted", className)}
+    {...props}
+  />
+))
+DropdownMenuSeparator.displayName = "DropdownMenuSeparator"
+
+export { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator }
 
