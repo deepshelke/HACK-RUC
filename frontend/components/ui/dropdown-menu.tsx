@@ -81,11 +81,18 @@ const DropdownMenuContent = React.forwardRef<
       <div
         ref={ref}
         className={cn(
-          "absolute z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md",
+          "absolute z-50 min-w-[8rem] overflow-visible rounded-md border bg-popover p-1 text-popover-foreground shadow-md",
           align === "end" ? "right-0 top-full mt-1" : "left-0 top-full mt-1",
           className
         )}
         onClick={(e) => e.stopPropagation()}
+        onMouseLeave={(e) => {
+          // Don't close if mouse is moving to submenu
+          const target = e.relatedTarget as HTMLElement
+          if (target?.closest('[data-submenu]')) {
+            return
+          }
+        }}
         {...props}
       >
         {children}
@@ -139,5 +146,103 @@ const DropdownMenuSeparator = React.forwardRef<
 ))
 DropdownMenuSeparator.displayName = "DropdownMenuSeparator"
 
-export { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator }
+const DropdownMenuSub = ({ children }: { children: React.ReactNode }) => {
+  const [subOpen, setSubOpen] = React.useState(false)
+  const { open: parentOpen } = React.useContext(DropdownMenuContext)
+  
+  return (
+    <div 
+      className="relative"
+      onMouseEnter={() => {
+        if (parentOpen) {
+          setSubOpen(true)
+        }
+      }}
+      onMouseLeave={() => setSubOpen(false)}
+    >
+      {React.Children.map(children, (child) => {
+        if (React.isValidElement(child)) {
+          return React.cloneElement(child, { subOpen, setSubOpen, parentOpen } as any)
+        }
+        return child
+      })}
+    </div>
+  )
+}
+
+const DropdownMenuSubTrigger = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement> & { subOpen?: boolean; setSubOpen?: (open: boolean) => void; parentOpen?: boolean }
+>(({ className, subOpen, setSubOpen, parentOpen, children, ...props }, ref) => {
+  return (
+    <div
+      ref={ref}
+      className={cn(
+        "relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground",
+        className
+      )}
+      onMouseEnter={() => {
+        if (parentOpen) {
+          setSubOpen?.(true)
+        }
+      }}
+      onClick={(e) => {
+        e.stopPropagation()
+        if (parentOpen) {
+          setSubOpen?.(!subOpen)
+        }
+      }}
+      {...props}
+    >
+      {children}
+      <svg
+        className="ml-auto h-4 w-4"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="m9 18 6-6-6-6" />
+      </svg>
+    </div>
+  )
+})
+DropdownMenuSubTrigger.displayName = "DropdownMenuSubTrigger"
+
+const DropdownMenuSubContent = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement> & { subOpen?: boolean; setSubOpen?: (open: boolean) => void; align?: "start" | "end" }
+>(({ className, subOpen, setSubOpen, align = "end", children, ...props }, ref) => {
+  if (!subOpen) return null
+
+  // For right-aligned menus, show submenu on the left side
+  const positionClass = align === "end" 
+    ? "right-full top-0 mr-1" 
+    : "left-full top-0 ml-1"
+
+  return (
+    <div
+      ref={ref}
+      data-submenu
+      className={cn(
+        "absolute z-[100] min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-lg",
+        positionClass,
+        className
+      )}
+      style={{ position: 'absolute' }}
+      onMouseEnter={() => setSubOpen?.(true)}
+      onMouseLeave={() => setSubOpen?.(false)}
+      onClick={(e) => e.stopPropagation()}
+      {...props}
+    >
+      {children}
+    </div>
+  )
+})
+DropdownMenuSubContent.displayName = "DropdownMenuSubContent"
+
+export { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent }
 

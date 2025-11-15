@@ -3,10 +3,10 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/contexts/AuthContext'
-import { useTheme } from '@/lib/contexts/ThemeContext'
+import { useTheme, type ThemeName } from '@/lib/contexts/ThemeContext'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { LogOut, LogIn, Moon, Sun, User } from 'lucide-react'
+import { LogOut, LogIn, Moon, Sun, User, Check } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,12 +14,15 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
 } from '@/components/ui/dropdown-menu'
 
 export default function UserAvatarMenu() {
   const router = useRouter()
   const { user, logout, isAuthenticated } = useAuth()
-  const { theme, toggleTheme } = useTheme()
+  const { themeName, themeMode, setTheme, toggleMode } = useTheme()
   const [open, setOpen] = useState(false)
 
   const handleLogout = async () => {
@@ -36,12 +39,21 @@ export default function UserAvatarMenu() {
     setOpen(false)
   }
 
-  const handleThemeToggle = () => {
-    toggleTheme()
+  const handleThemeSelect = (name: ThemeName) => {
+    setTheme(name, themeMode)
+  }
+
+  const handleModeToggle = () => {
+    toggleMode()
   }
 
   // Get user's nickname or first name
   const nickname = user?.name?.split(' ')[0] || user?.name || 'Guest'
+
+  const themes: { name: ThemeName; label: string }[] = [
+    { name: 'caffeine', label: 'Caffeine' },
+    { name: 'neo-brutalism', label: 'Neo Brutalism' },
+  ]
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
@@ -84,8 +96,34 @@ export default function UserAvatarMenu() {
               <DropdownMenuSeparator />
             </>
           )}
-          <DropdownMenuItem onClick={handleThemeToggle}>
-            {theme === 'dark' ? (
+          
+          {/* Theme Selection */}
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger className="w-full">
+              <span>Theme</span>
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent className="w-48" align="end">
+              {themes.map((theme) => (
+                <div
+                  key={theme.name}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleThemeSelect(theme.name)
+                  }}
+                  className="relative flex cursor-pointer select-none items-center justify-between rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground"
+                >
+                  <span>{theme.label}</span>
+                  {themeName === theme.name && (
+                    <Check className="h-4 w-4" />
+                  )}
+                </div>
+              ))}
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
+
+          {/* Mode Toggle */}
+          <DropdownMenuItem onClick={handleModeToggle}>
+            {themeMode === 'dark' ? (
               <>
                 <Sun className="mr-2 h-4 w-4" />
                 <span>Light mode</span>
@@ -97,7 +135,9 @@ export default function UserAvatarMenu() {
               </>
             )}
           </DropdownMenuItem>
+          
           <DropdownMenuSeparator />
+          
           {isAuthenticated ? (
             <DropdownMenuItem onClick={handleLogout}>
               <LogOut className="mr-2 h-4 w-4" />
