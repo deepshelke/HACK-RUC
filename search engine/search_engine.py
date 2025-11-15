@@ -20,6 +20,8 @@ from pinecone import Pinecone
 import json
 import re
 from typing import Dict, List, Optional, Tuple
+import requests
+from bs4 import BeautifulSoup
 
 # Load environment variables
 load_dotenv(Path(__file__).parent.parent / ".env")
@@ -70,6 +72,21 @@ JURISDICTIONS = {
     "new jersey": "NJ",
     "philly": "PHILADELPHIA",
     "philadelphia": "PHILADELPHIA"
+}
+
+# Supported jurisdictions for our dataset
+SUPPORTED_JURISDICTIONS = {"US_FEDERAL", "NY", "NYC", "NJ", "PHILADELPHIA"}
+
+# State name mappings for DOL website
+STATE_MAPPINGS = {
+    "new york": "New York",
+    "new jersey": "New Jersey",
+    "pennsylvania": "Pennsylvania",
+    "philadelphia": "Pennsylvania",  # Philadelphia is in PA
+    "philly": "Pennsylvania",
+    "ny": "New York",
+    "nj": "New Jersey",
+    "pa": "Pennsylvania",
 }
 
 
@@ -213,17 +230,47 @@ Refined Search Prompt:"""
         print("LAYER 1: PROMPT PROCESSING & VECTORIZATION")
         print("="*70)
         
-        # Step 1: Check if jurisdiction clarification needed
+        # Step 1: Normalize jurisdiction if provided (robust handling)
+        final_jurisdiction = None
+        if jurisdiction:
+            # Use inline normalization (same logic as normalize_jurisdiction_input)
+            jurisdiction_lower = jurisdiction.lower().strip()
+            normalized = JURISDICTIONS.get(jurisdiction_lower)
+            
+            # If not found, try common variations
+            if not normalized:
+                if 'federal' in jurisdiction_lower or 'fed' in jurisdiction_lower or ('us' in jurisdiction_lower and 'federal' in jurisdiction_lower):
+                    normalized = 'US_FEDERAL'
+                elif 'new york' in jurisdiction_lower:
+                    if 'city' in jurisdiction_lower or jurisdiction_lower == 'nyc':
+                        normalized = 'NYC'
+                    else:
+                        normalized = 'NY'
+                elif jurisdiction_lower in ['ny', 'nyc']:
+                    normalized = 'NYC' if jurisdiction_lower == 'nyc' else 'NY'
+                elif 'new jersey' in jurisdiction_lower or jurisdiction_lower == 'nj':
+                    normalized = 'NJ'
+                elif 'philadelphia' in jurisdiction_lower or 'philly' in jurisdiction_lower:
+                    normalized = 'PHILADELPHIA'
+            
+            # Also check if it's already in normalized format
+            if not normalized:
+                jurisdiction_upper = jurisdiction.upper().strip()
+                if jurisdiction_upper in ['US_FEDERAL', 'NY', 'NYC', 'NJ', 'PHILADELPHIA']:
+                    normalized = jurisdiction_upper
+            
+            final_jurisdiction = normalized
+            if not final_jurisdiction:
+                print(f"   ⚠️  Could not normalize jurisdiction '{jurisdiction}', treating as None")
+        
+        # Step 2: Check if jurisdiction clarification needed
         # Only check query if jurisdiction is NOT already provided
-        if jurisdiction is None:
+        if final_jurisdiction is None:
             needs_clarification, detected_jurisdiction = self.detect_jurisdiction_need(query)
             if needs_clarification:
                 print("   📍 Jurisdiction clarification needed")
                 return None, self.ask_jurisdiction(), None
             final_jurisdiction = detected_jurisdiction
-        else:
-            # Use provided jurisdiction directly - no need to check query
-            final_jurisdiction = jurisdiction
         
         # Step 2: Refine prompt
         print(f"   🔧 Refining prompt...")
@@ -447,21 +494,86 @@ Only respond with the JSON, no additional text."""
             # If validation fails, still proceed but warn
             return True, "Validation check failed, proceeding anyway"
     
+    def generate_response_with_dol(self, query: str, chunks: List[Dict], jurisdiction: Optional[str], dol_data: Dict, dol_url: str) -> str:
+        """
+        Generate response with DOL website data for minimum wage queries.
+        """
+        print(f"   🤖 Generating response with DOL data...")
+        
+        # Prepare context from chunks (without source numbers)
+        context_parts = []
+        for chunk in chunks:
+            context_parts.append(chunk.get('text', ''))
+        
+        context = "\n\n".join(context_parts)
+        
+        # Prepare DOL data
+        dol_text = ""
+        if dol_data:
+            for state, info in dol_data.items():
+                dol_text += f"{state}: {info}\n\n"
+        
+        # Build prompt
+        system_prompt = f"""You are a helpful assistant providing information about minimum wage from official sources.
+
+You have access to:
+1. Official U.S. Department of Labor (DOL) website data (most current and authoritative)
+2. Local documents from our database
+
+Jurisdiction: {jurisdiction or "Multiple/Not specified"}
+
+OFFICIAL DOL WEBSITE DATA (Most Current):
+{dol_text}
+
+LOCAL DATABASE CONTEXT:
+{context}
+
+User Question: {query}
+
+Instructions:
+1. PRIORITIZE the DOL website data as it is the most current and official source
+2. Use local database context to supplement or provide additional details
+3. Write in a clear, conversational, and easy-to-understand way
+4. Do NOT use markdown formatting like **bold** or ***
+5. Do NOT use source citations like "Source 1" or "Source 2"
+6. Just provide the information naturally in plain text
+7. Include specific dollar amounts from DOL data
+8. Be accurate and specific
+9. If there are discrepancies, prefer DOL data
+10. Mention the DOL website naturally in your response, not as a citation
+
+Answer:"""
+
+        try:
+            response = self.model.generate_content(
+                system_prompt,
+                generation_config={
+                    "temperature": 0.3,
+                    "max_output_tokens": 1500,
+                }
+            )
+            
+            answer = response.text.strip()
+            print(f"   ✅ Response generated with DOL data ({len(answer)} characters)")
+            return answer
+            
+        except Exception as e:
+            print(f"   ❌ Error generating response: {e}")
+            # Fallback to regular response
+            return self.generate_response(query, chunks, jurisdiction)
+    
     def generate_response(self, query: str, chunks: List[Dict], jurisdiction: Optional[str] = None) -> str:
         """
         Generate response using Gemini with retrieved context.
         """
         print(f"   🤖 Generating response...")
         
-        # Prepare context
+        # Prepare context (without source numbers)
         context_parts = []
-        for i, chunk in enumerate(chunks, 1):
-            context_parts.append(
-                f"[Source {i}: {chunk.get('source_file', 'Unknown')} - {chunk.get('jurisdiction', 'Unknown')} jurisdiction]\n"
-                f"{chunk.get('text', '')}\n"
-            )
+        for chunk in chunks:
+            context_parts.append(chunk.get('text', ''))
         
-        context = "\n---\n".join(context_parts)
+        context = "\n\n".join(context_parts)
         
         # Build prompt
         system_prompt = f"""You are a helpful assistant providing information about domestic worker rights and labor laws.
@@ -477,15 +589,18 @@ User Question: {query}
 
 Instructions:
 1. Answer based ONLY on the provided context
-2. Cite the source document when possible
-3. Be accurate and specific - include exact dollar amounts, percentages, numbers, and dates when mentioned in the context
-4. If asking about wages, salaries, or monetary amounts:
+2. Write in a clear, conversational, and easy-to-understand way
+3. Do NOT use markdown formatting like **bold** or *** or bullet points with *
+4. Do NOT use source citations like "Source 1" or "Source 2"
+5. Just provide the information naturally in plain text
+6. Be accurate and specific - include exact dollar amounts, percentages, numbers, and dates when mentioned in the context
+7. If asking about wages, salaries, or monetary amounts:
    - Include the specific USD dollar amounts if available in the context
    - If specific amounts are not in the context, clearly state: "The specific dollar amount is not provided in the available documents"
    - Provide any related information that IS available (e.g., "must be paid at least minimum wage", "overtime rates", etc.)
    - Suggest contacting the relevant labor department or official source for current specific amounts
-5. If information is not available, clearly state that and provide helpful next steps
-6. Use clear, professional language
+8. If information is not available, clearly state that and provide helpful next steps
+9. Use clear, simple language that anyone can understand
 
 Answer:"""
 
@@ -528,6 +643,135 @@ Answer:"""
 
 
 # ============================================================================
+# DOL WEBSITE FETCHER AND HELPER FUNCTIONS
+# ============================================================================
+
+def fetch_dol_minimum_wage(state_name: str = None) -> Dict:
+    """
+    Fetch minimum wage information from DOL official website.
+    Returns a dictionary with state minimum wage data.
+    """
+    try:
+        url = "https://www.dol.gov/agencies/whd/minimum-wage/state"
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        }
+        
+        response = requests.get(url, headers=headers, timeout=10)
+        response.raise_for_status()
+        
+        soup = BeautifulSoup(response.content, 'html.parser')
+        
+        # Find the main content area
+        main_content = soup.find('main') or soup.find('div', class_='main-content') or soup
+        
+        # Extract state information
+        state_data = {}
+        
+        if state_name:
+            # Look for specific state
+            state_heading = None
+            for heading in main_content.find_all(['h2', 'h3', 'h4']):
+                if heading.get_text().strip().lower() == state_name.lower():
+                    state_heading = heading
+                    break
+            
+            if state_heading:
+                # Extract information for this state
+                current = state_heading.find_next_sibling()
+                state_text = []
+                while current and current.name not in ['h2', 'h3', 'h4']:
+                    if current.name == 'p':
+                        state_text.append(current.get_text().strip())
+                    current = current.find_next_sibling()
+                
+                state_data[state_name] = ' '.join(state_text)
+        else:
+            # Extract all states (for general minimum wage query)
+            # Look for state headings and their content
+            for heading in main_content.find_all(['h2', 'h3']):
+                heading_text = heading.get_text().strip()
+                if heading_text and len(heading_text) < 50:  # Likely a state name
+                    current = heading.find_next_sibling()
+                    state_text = []
+                    while current and current.name not in ['h2', 'h3', 'h4']:
+                        if current.name == 'p':
+                            state_text.append(current.get_text().strip())
+                        current = current.find_next_sibling()
+                    
+                    if state_text:
+                        state_data[heading_text] = ' '.join(state_text)
+        
+        return {
+            'success': True,
+            'data': state_data,
+            'source': 'U.S. Department of Labor - Official Website',
+            'url': url
+        }
+    except Exception as e:
+        return {
+            'success': False,
+            'error': str(e),
+            'source': 'U.S. Department of Labor - Official Website'
+        }
+
+
+def is_minimum_wage_query(query: str) -> bool:
+    """Check if query is about minimum wage."""
+    query_lower = query.lower()
+    wage_keywords = ['minimum wage', 'min wage', 'wage', 'hourly rate', 'pay rate']
+    return any(keyword in query_lower for keyword in wage_keywords)
+
+
+def is_unsupported_state(jurisdiction: str, query: str) -> bool:
+    """Check if query is about an unsupported state - for ANY query, not just minimum wage."""
+    if not jurisdiction:
+        # Check if query mentions unsupported states even without jurisdiction
+        query_lower = query.lower()
+        unsupported_states = [
+            'california', 'texas', 'florida', 'illinois', 'ohio', 'georgia',
+            'north carolina', 'michigan', 'virginia', 'washington', 'arizona',
+            'massachusetts', 'tennessee', 'indiana', 'missouri', 'maryland',
+            'wisconsin', 'colorado', 'minnesota', 'south carolina', 'alabama',
+            'louisiana', 'kentucky', 'oregon', 'oklahoma', 'connecticut',
+            'utah', 'iowa', 'nevada', 'arkansas', 'mississippi', 'kansas',
+            'new mexico', 'nebraska', 'west virginia', 'idaho', 'hawaii',
+            'new hampshire', 'maine', 'montana', 'rhode island', 'delaware',
+            'south dakota', 'north dakota', 'alaska', 'vermont', 'wyoming'
+        ]
+        for state in unsupported_states:
+            if state in query_lower:
+                return True
+        return False
+    
+    jurisdiction_upper = jurisdiction.upper()
+    
+    # If it's a supported jurisdiction, return False
+    if jurisdiction_upper in SUPPORTED_JURISDICTIONS:
+        return False
+    
+    # Check if query mentions other states
+    query_lower = query.lower()
+    unsupported_states = [
+        'california', 'texas', 'florida', 'illinois', 'ohio', 'georgia',
+        'north carolina', 'michigan', 'virginia', 'washington', 'arizona',
+        'massachusetts', 'tennessee', 'indiana', 'missouri', 'maryland',
+        'wisconsin', 'colorado', 'minnesota', 'south carolina', 'alabama',
+        'louisiana', 'kentucky', 'oregon', 'oklahoma', 'connecticut',
+        'utah', 'iowa', 'nevada', 'arkansas', 'mississippi', 'kansas',
+        'new mexico', 'nebraska', 'west virginia', 'idaho', 'hawaii',
+        'new hampshire', 'maine', 'montana', 'rhode island', 'delaware',
+        'south dakota', 'north dakota', 'alaska', 'vermont', 'wyoming'
+    ]
+    
+    for state in unsupported_states:
+        if state in query_lower and jurisdiction_upper not in SUPPORTED_JURISDICTIONS:
+            return True
+    
+    return False
+
+
+# ============================================================================
 # MAIN SEARCH ENGINE
 # ============================================================================
 
@@ -555,6 +799,36 @@ class SearchEngine:
         Returns:
             Dictionary with search results
         """
+        # Check for unsupported states FIRST (for ANY query, not just minimum wage)
+        # This must happen before any processing
+        if is_unsupported_state(jurisdiction, query):
+            return {
+                "success": False,
+                "needs_clarification": False,
+                "message": "I can only provide information for US Federal, New York (NY), New Jersey (NJ), and Philadelphia jurisdictions. For other states, please visit the official U.S. Department of Labor website: https://www.dol.gov/agencies/whd/minimum-wage/state",
+                "response": None,
+                "chunks_found": 0
+            }
+        
+        # Check if query is about minimum wage
+        dol_context = None
+        dol_data = None
+        if is_minimum_wage_query(query):
+            # Fetch from DOL website
+            print("   🌐 Fetching minimum wage data from DOL official website...")
+            state_name = None
+            if jurisdiction:
+                state_name = STATE_MAPPINGS.get(jurisdiction.lower())
+            
+            dol_data = fetch_dol_minimum_wage(state_name)
+            
+            if dol_data.get('success'):
+                print("   ✅ Successfully fetched DOL data")
+                # Continue with normal search but include DOL data in response
+                dol_context = dol_data.get('data', {})
+            else:
+                print(f"   ⚠️  Could not fetch DOL data: {dol_data.get('error')}")
+                dol_context = None
         print("\n" + "="*70)
         print("SEARCH REQUEST")
         print("="*70)
@@ -563,22 +837,12 @@ class SearchEngine:
             print(f"Jurisdiction: {jurisdiction}")
         
         try:
-            # Normalize jurisdiction if provided
+            # Normalize jurisdiction if provided (use robust normalization)
             normalized_jurisdiction = None
             if jurisdiction:
-                jurisdiction_lower = jurisdiction.lower()
-                # Try to get from JURISDICTIONS mapping first
-                normalized_jurisdiction = JURISDICTIONS.get(jurisdiction_lower)
-                
-                # If not found in mapping, check if it's already in normalized format
+                normalized_jurisdiction = normalize_jurisdiction_input(jurisdiction)
                 if not normalized_jurisdiction:
-                    # Handle formats like 'us_federal', 'ny', 'nj', etc. directly
-                    jurisdiction_upper = jurisdiction.upper()
-                    if jurisdiction_upper in ['US_FEDERAL', 'NY', 'NYC', 'NJ', 'PHILADELPHIA']:
-                        normalized_jurisdiction = jurisdiction_upper
-                    # Also handle lowercase versions
-                    elif jurisdiction_lower in ['us_federal', 'ny', 'nyc', 'nj', 'philadelphia']:
-                        normalized_jurisdiction = jurisdiction_upper
+                    print(f"   ⚠️  Warning: Could not normalize jurisdiction '{jurisdiction}', proceeding without filter")
             
             # LAYER 1: Process query and generate embedding
             embedding, refined_prompt, detected_jurisdiction = self.layer1.process(
@@ -611,12 +875,23 @@ class SearchEngine:
                 }
             
             # LAYER 3: Generate response with validation
-            response = self.layer3.process(
-                query,
-                refined_prompt,
-                chunks,
-                final_jurisdiction
-            )
+            # If we have DOL data for minimum wage queries, include it
+            if dol_context and is_minimum_wage_query(query):
+                # Use DOL-enhanced response generation
+                response = self.layer3.generate_response_with_dol(
+                    query,
+                    chunks,
+                    final_jurisdiction,
+                    dol_context,
+                    dol_data.get('url', 'https://www.dol.gov/agencies/whd/minimum-wage/state')
+                )
+            else:
+                response = self.layer3.process(
+                    query,
+                    refined_prompt,
+                    chunks,
+                    final_jurisdiction
+                )
             
             return {
                 "success": True,
@@ -645,6 +920,44 @@ class SearchEngine:
 # INTERACTIVE CLI
 # ============================================================================
 
+def normalize_jurisdiction_input(jurisdiction_input: str) -> Optional[str]:
+    """
+    Robustly normalize jurisdiction input to standard format.
+    Returns normalized jurisdiction or None if invalid.
+    """
+    if not jurisdiction_input:
+        return None
+    
+    jurisdiction_lower = jurisdiction_input.lower().strip()
+    
+    # Try direct mapping first
+    normalized = JURISDICTIONS.get(jurisdiction_lower)
+    
+    # If not found, try common variations
+    if not normalized:
+        if 'federal' in jurisdiction_lower or 'fed' in jurisdiction_lower or ('us' in jurisdiction_lower and 'federal' in jurisdiction_lower):
+            normalized = 'US_FEDERAL'
+        elif 'new york' in jurisdiction_lower:
+            if 'city' in jurisdiction_lower or jurisdiction_lower == 'nyc':
+                normalized = 'NYC'
+            else:
+                normalized = 'NY'
+        elif jurisdiction_lower in ['ny', 'nyc']:
+            normalized = 'NYC' if jurisdiction_lower == 'nyc' else 'NY'
+        elif 'new jersey' in jurisdiction_lower or jurisdiction_lower == 'nj':
+            normalized = 'NJ'
+        elif 'philadelphia' in jurisdiction_lower or 'philly' in jurisdiction_lower:
+            normalized = 'PHILADELPHIA'
+    
+    # Also check if it's already in normalized format
+    if not normalized:
+        jurisdiction_upper = jurisdiction_input.upper().strip()
+        if jurisdiction_upper in ['US_FEDERAL', 'NY', 'NYC', 'NJ', 'PHILADELPHIA']:
+            normalized = jurisdiction_upper
+    
+    return normalized
+
+
 def main():
     """Interactive CLI for testing the search engine."""
     print("\n" + "="*70)
@@ -658,8 +971,10 @@ def main():
     
     # Track conversation state
     current_jurisdiction = None
-    pending_jurisdiction = None
+    pending_query = None  # Store the original query when jurisdiction is needed
     is_new_chat = True
+    jurisdiction_attempts = 0  # Prevent infinite loops
+    MAX_JURISDICTION_ATTEMPTS = 3
     
     # Ask for jurisdiction at the start of new chat
     print("📍 Please specify your jurisdiction:")
@@ -685,39 +1000,59 @@ def main():
             
             # Handle jurisdiction selection or change
             if is_new_chat or current_jurisdiction is None or user_input.lower() == 'change':
-                jurisdiction_input = user_input.lower() if user_input.lower() != 'change' else None
+                jurisdiction_input = user_input if user_input.lower() != 'change' else None
                 
                 if user_input.lower() == 'change':
                     print("\n📍 Change jurisdiction to:")
                     print("   Options: US Federal, NY, NYC, NJ, or Philadelphia")
-                    jurisdiction_input = input("   New jurisdiction: ").strip().lower()
+                    jurisdiction_input = input("   New jurisdiction: ").strip()
                 
-                normalized = JURISDICTIONS.get(jurisdiction_input) if jurisdiction_input else None
+                # Use robust normalization function
+                normalized = normalize_jurisdiction_input(jurisdiction_input) if jurisdiction_input else None
                 
                 if normalized:
                     current_jurisdiction = normalized
                     is_new_chat = False
+                    pending_query = None  # Clear any pending query
+                    jurisdiction_attempts = 0  # Reset attempts
                     print(f"✅ Jurisdiction set to: {current_jurisdiction}")
                     print("   You can now ask your questions!\n")
                     continue
                 else:
-                    print("⚠️  Please specify a valid jurisdiction: US Federal, NY, NYC, NJ, or Philadelphia")
+                    jurisdiction_attempts += 1
+                    if jurisdiction_attempts >= MAX_JURISDICTION_ATTEMPTS:
+                        print(f"\n⚠️  Maximum attempts reached. Please try again later.")
+                        print("   Valid options: US Federal, NY, NYC, NJ, or Philadelphia")
+                        jurisdiction_attempts = 0
+                    else:
+                        print("⚠️  Please specify a valid jurisdiction: US Federal, NY, NYC, NJ, or Philadelphia")
                     if is_new_chat:
                         continue
                     # If changing jurisdiction failed, continue with current one
             
             # Check if this is a jurisdiction response for a pending query
-            if pending_jurisdiction:
+            if pending_query:
                 # User is responding to jurisdiction question
-                jurisdiction_input = user_input.lower()
-                normalized = JURISDICTIONS.get(jurisdiction_input)
+                normalized = normalize_jurisdiction_input(user_input)
                 
                 if normalized:
                     # Process original query with jurisdiction
-                    result = engine.search(pending_jurisdiction, normalized)
-                    pending_jurisdiction = None
+                    result = engine.search(pending_query, normalized)
+                    current_jurisdiction = normalized  # Set it for future queries
+                    pending_query = None
+                    jurisdiction_attempts = 0  # Reset attempts
                 else:
-                    print("⚠️  Please specify a valid jurisdiction: US Federal, NY, NYC, NJ, or Philadelphia")
+                    jurisdiction_attempts += 1
+                    if jurisdiction_attempts >= MAX_JURISDICTION_ATTEMPTS:
+                        print(f"\n⚠️  Maximum attempts reached. Resetting...")
+                        pending_query = None
+                        current_jurisdiction = None
+                        jurisdiction_attempts = 0
+                        is_new_chat = True
+                        print("📍 Please specify your jurisdiction again:")
+                        print("   Options: US Federal, NY, NYC, NJ, or Philadelphia\n")
+                    else:
+                        print("⚠️  Please specify a valid jurisdiction: US Federal, NY, NYC, NJ, or Philadelphia")
                     continue
             else:
                 # Normal query - use current jurisdiction
@@ -726,14 +1061,19 @@ def main():
             # Handle result
             if result.get("needs_clarification"):
                 print(f"\n📋 {result['message']}")
-                pending_jurisdiction = user_input  # Store original query
+                pending_query = user_input  # Store original query
+                jurisdiction_attempts = 0  # Reset attempts for new clarification
             elif result.get("success"):
                 print(f"\n✅ Answer ({result['chunks_found']} sources found):")
                 print(f"\n{result['response']}")
                 if result.get('jurisdiction'):
-                    print(f"\n📍 Jurisdiction: {result['jurisdiction']}")
+                    # Update current jurisdiction if detected
+                    if result['jurisdiction'] and result['jurisdiction'] in SUPPORTED_JURISDICTIONS:
+                        current_jurisdiction = result['jurisdiction']
+                jurisdiction_attempts = 0  # Reset attempts on success
             else:
                 print(f"\n❌ {result.get('message', 'No results found')}")
+                # Don't increment attempts for search failures, only for jurisdiction issues
         
         except KeyboardInterrupt:
             print("\n\n👋 Goodbye!")
