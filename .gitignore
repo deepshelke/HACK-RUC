@@ -89,3 +89,6 @@ temp/
 # yarn.lock
 # pnpm-lock.yaml
 
+# Backend-specific: Dataset and data directories
+dataset/
+new_data/
