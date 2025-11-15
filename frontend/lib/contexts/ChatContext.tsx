@@ -87,44 +87,38 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(false)
   const [isSending, setIsSending] = useState(false)
 
-  // Load local chats on mount for unauthenticated users
+  // Load chats from API on mount (backend doesn't require auth)
   useEffect(() => {
-    if (!isAuthenticated) {
-      const localChats = getLocalChats()
-      setChats(localChats)
-      
-      const currentChatId = getLocalCurrentChat()
-      if (currentChatId) {
-        const chat = localChats.find(c => c.id === currentChatId)
-        if (chat) {
-          setCurrentChat(chat)
-          const localMessages = getLocalMessages().filter(m => m.chatId === currentChatId)
-          setMessages(localMessages)
+    const loadInitialData = async () => {
+      try {
+        await refreshChats()
+      } catch (error) {
+        console.error('Failed to load chats:', error)
+        // Fallback to local storage if API fails
+        const localChats = getLocalChats()
+        setChats(localChats)
+        
+        const currentChatId = getLocalCurrentChat()
+        if (currentChatId) {
+          const chat = localChats.find(c => c.id === currentChatId)
+          if (chat) {
+            setCurrentChat(chat)
+            const localMessages = getLocalMessages().filter(m => m.chatId === currentChatId)
+            setMessages(localMessages)
+          }
         }
       }
     }
-  }, [isAuthenticated])
-
-  // Load chats from API when authenticated
-  useEffect(() => {
-    if (isAuthenticated) {
-      refreshChats()
-    }
-  }, [isAuthenticated])
+    loadInitialData()
+  }, [])
 
   useEffect(() => {
     if (currentChat) {
-      if (isAuthenticated) {
-        loadMessages(currentChat.id)
-      } else {
-        // For unauthenticated users, load from local storage
-        const localMessages = getLocalMessages().filter(m => m.chatId === currentChat.id)
-        setMessages(localMessages)
-      }
+      loadMessages(currentChat.id)
     } else {
       setMessages([])
     }
-  }, [currentChat, isAuthenticated])
+  }, [currentChat])
 
   // Helper to normalize dates from API responses (JSON serializes dates as strings)
   const normalizeChatDates = (chat: any): Chat => ({
@@ -140,8 +134,6 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   })
 
   const refreshChats = async () => {
-    if (!isAuthenticated) return
-    
     try {
       setIsLoading(true)
       const response = await chatsApi.getChats()
@@ -149,14 +141,13 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       setChats(response.data.map(normalizeChatDates))
     } catch (error) {
       console.error('Failed to load chats:', error)
+      throw error
     } finally {
       setIsLoading(false)
     }
   }
 
   const loadMessages = async (chatId: string) => {
-    if (!isAuthenticated) return
-    
     try {
       setIsLoading(true)
       const response = await messagesApi.getMessages(chatId)
@@ -170,84 +161,51 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   }
 
   const createChat = async (): Promise<Chat> => {
-    const newChat: Chat = {
-      id: `local-${Date.now()}`,
-      title: `New Chat ${(isAuthenticated ? chats.length : getLocalChats().length) + 1}`,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      messageCount: 0,
-      userId: isAuthenticated ? 'authenticated' : 'anonymous',
+    try {
+      const response = await chatsApi.createChat()
+      // Normalize dates from API response
+      const serverChat = normalizeChatDates(response.data)
+      setChats(prev => [serverChat, ...prev])
+      setCurrentChat(serverChat)
+      setMessages([])
+      saveLocalCurrentChat(serverChat.id)
+      return serverChat
+    } catch (error) {
+      console.error('Failed to create chat:', error)
+      throw error
     }
-
-    if (isAuthenticated) {
-      try {
-        const response = await chatsApi.createChat()
-        // Normalize dates from API response
-        const serverChat = normalizeChatDates(response.data)
-        setChats(prev => [serverChat, ...prev])
-        setCurrentChat(serverChat)
-        setMessages([])
-        return serverChat
-      } catch (error) {
-        console.error('Failed to create chat on server:', error)
-        // Fallback to local chat
-      }
-    }
-
-    // Create local chat (for unauthenticated or as fallback)
-    const updatedChats = [newChat, ...(isAuthenticated ? chats : getLocalChats())]
-    setChats(updatedChats)
-    if (!isAuthenticated) {
-      saveLocalChats(updatedChats)
-    }
-    setCurrentChat(newChat)
-    setMessages([])
-    saveLocalCurrentChat(newChat.id)
-    return newChat
   }
 
   const selectChat = async (chatId: string) => {
-    if (isAuthenticated) {
-      try {
-        const response = await chatsApi.getChat(chatId)
-        // Normalize dates from API response
-        setCurrentChat(normalizeChatDates(response.data))
+    try {
+      const response = await chatsApi.getChat(chatId)
+      // Normalize dates from API response
+      setCurrentChat(normalizeChatDates(response.data))
+      saveLocalCurrentChat(chatId)
+    } catch (error) {
+      console.error('Failed to load chat:', error)
+      // Fallback to finding in current chats list
+      const chat = chats.find(c => c.id === chatId)
+      if (chat) {
+        setCurrentChat(chat)
         saveLocalCurrentChat(chatId)
-        return
-      } catch (error) {
-        console.error('Failed to load chat:', error)
+      } else {
         throw error
       }
-    }
-
-    // For unauthenticated users, find in local chats
-    const chat = chats.find(c => c.id === chatId)
-    if (chat) {
-      setCurrentChat(chat)
-      saveLocalCurrentChat(chatId)
-      const localMessages = getLocalMessages().filter(m => m.chatId === chatId)
-      setMessages(localMessages)
     }
   }
 
   const deleteChat = async (chatId: string) => {
-    if (isAuthenticated) {
-      try {
-        await chatsApi.deleteChat(chatId)
-      } catch (error) {
-        console.error('Failed to delete chat on server:', error)
-      }
+    try {
+      await chatsApi.deleteChat(chatId)
+    } catch (error) {
+      console.error('Failed to delete chat:', error)
+      // Continue with local deletion even if API fails
     }
 
-    // Remove from local state and storage
+    // Remove from local state
     const updatedChats = chats.filter(c => c.id !== chatId)
     setChats(updatedChats)
-    
-    if (!isAuthenticated) {
-      saveLocalChats(updatedChats)
-      const localMessages = getLocalMessages().filter(m => m.chatId !== chatId)
-      saveLocalMessages(localMessages)
-    }
 
     if (currentChat?.id === chatId) {
       setCurrentChat(null)
@@ -257,104 +215,98 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   }
 
   const updateChatTitle = async (chatId: string, title: string) => {
-    if (isAuthenticated) {
-      try {
-        const response = await chatsApi.updateChat(chatId, { title })
-        // Normalize dates from API response
-        const updatedChat = normalizeChatDates(response.data)
-        setChats(prev => prev.map(c => c.id === chatId ? updatedChat : c))
-        if (currentChat?.id === chatId) {
-          setCurrentChat(updatedChat)
-        }
-        return
-      } catch (error) {
-        console.error('Failed to update chat on server:', error)
+    try {
+      const response = await chatsApi.updateChat(chatId, { title })
+      // Normalize dates from API response
+      const updatedChat = normalizeChatDates(response.data)
+      setChats(prev => prev.map(c => c.id === chatId ? updatedChat : c))
+      if (currentChat?.id === chatId) {
+        setCurrentChat(updatedChat)
       }
-    }
-
-    // Update local chat
-    const updatedChats = chats.map(c => 
-      c.id === chatId ? { ...c, title, updatedAt: new Date() } : c
-    )
-    setChats(updatedChats)
-    if (!isAuthenticated) {
-      saveLocalChats(updatedChats)
-    }
-    if (currentChat?.id === chatId) {
-      setCurrentChat(updatedChats.find(c => c.id === chatId) || null)
+    } catch (error) {
+      console.error('Failed to update chat:', error)
+      throw error
     }
   }
 
   const sendMessage = async (content: string) => {
     if (!currentChat || !content.trim()) return
 
+    const chatId = currentChat.id // Store chatId to avoid closure issues
+
     try {
       setIsSending(true)
 
-      // Add user message immediately
-      const userMessage: Message = {
-        id: `msg-${Date.now()}`,
-        content: content.trim(),
-        role: 'user',
-        timestamp: new Date(),
-        chatId: currentChat.id,
-      }
+      // Send user message to API (triggers AI response in background)
+      const response = await messagesApi.createMessage(chatId, content.trim(), 'user')
+      const userMessage = normalizeMessageDates(response.data)
+      
+      // Add user message to UI immediately
       setMessages(prev => [...prev, userMessage])
 
-      // Save to local storage for unauthenticated users
-      if (!isAuthenticated) {
-        const localMessages = getLocalMessages()
-        localMessages.push(userMessage)
-        saveLocalMessages(localMessages)
-      } else {
-        // Save user message to API
-        await messagesApi.createMessage(currentChat.id, content.trim(), 'user')
+      // Poll for AI response (generated in background)
+      const pollForAIResponse = () => {
+        const maxAttempts = 15 // Poll for up to 30 seconds (15 * 2s)
+        let attempts = 0
+        
+        const pollInterval = setInterval(async () => {
+          attempts++
+          
+          try {
+            const messagesResponse = await messagesApi.getMessages(chatId)
+            const allMessages = messagesResponse.data.map(normalizeMessageDates)
+            
+            // Check if AI response has arrived
+            const hasAssistantMessage = allMessages.some(
+              msg => msg.role === 'assistant' && 
+              new Date(msg.timestamp) > new Date(userMessage.timestamp)
+            )
+            
+            if (hasAssistantMessage || attempts >= maxAttempts) {
+              clearInterval(pollInterval)
+              
+              // Update messages with latest from server
+              setMessages(allMessages)
+              
+              // Refresh chat to get updated metadata
+              try {
+                await refreshChats()
+                
+                // Update current chat if it's still selected
+                const updatedChatsResponse = await chatsApi.getChats()
+                const updatedChat = updatedChatsResponse.data
+                  .map(normalizeChatDates)
+                  .find(c => c.id === chatId)
+                if (updatedChat) {
+                  setCurrentChat(updatedChat)
+                }
+              } catch (error) {
+                console.error('Error refreshing chat:', error)
+              } finally {
+                // Stop showing loading indicator
+                setIsSending(false)
+              }
+            }
+          } catch (error) {
+            console.error('Error polling for AI response:', error)
+            if (attempts >= maxAttempts) {
+              clearInterval(pollInterval)
+              setIsSending(false)
+            }
+          }
+        }, 2000) // Poll every 2 seconds
+        
+        // Store interval ID for cleanup if needed
+        return pollInterval
       }
 
-      // Simulate assistant response (replace with actual API call)
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      const assistantResponse = `This is a simulated response to: "${content}". In a real implementation, this would connect to your backend API.`
-      
-      const assistantMessage: Message = {
-        id: `msg-${Date.now() + 1}`,
-        content: assistantResponse,
-        role: 'assistant',
-        timestamp: new Date(),
-        chatId: currentChat.id,
-      }
-      setMessages(prev => [...prev, assistantMessage])
+      // Start polling for AI response
+      pollForAIResponse()
 
-      // Save assistant message
-      if (!isAuthenticated) {
-        const localMessages = getLocalMessages()
-        localMessages.push(assistantMessage)
-        saveLocalMessages(localMessages)
-      } else {
-        await messagesApi.createMessage(currentChat.id, assistantResponse, 'assistant')
-      }
-
-      // Update chat's last message
-      const updatedChat = {
-        ...currentChat,
-        lastMessage: assistantResponse.substring(0, 100),
-        lastMessageAt: new Date(),
-        messageCount: messages.length + 2,
-        updatedAt: new Date(),
-      }
-      setCurrentChat(updatedChat)
-      const updatedChats = chats.map(c => c.id === currentChat.id ? updatedChat : c)
-      setChats(updatedChats)
-      
-      if (!isAuthenticated) {
-        saveLocalChats(updatedChats)
-      } else {
-        await refreshChats()
-      }
     } catch (error) {
       console.error('Failed to send message:', error)
-      throw error
-    } finally {
       setIsSending(false)
+      throw error
     }
   }
 

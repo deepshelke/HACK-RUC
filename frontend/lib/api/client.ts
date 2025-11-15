@@ -40,15 +40,25 @@ class ApiClient {
 
       clearTimeout(timeoutId)
 
+      // Try to parse JSON, but handle non-JSON responses
+      let data
+      const contentType = response.headers.get('content-type')
+      if (contentType && contentType.includes('application/json')) {
+        data = await response.json()
+      } else {
+        const text = await response.text()
+        data = text ? { error: text } : {}
+      }
+
       if (!response.ok) {
         const error: ApiError = {
-          message: response.statusText,
+          message: data.error || data.message || response.statusText,
           status: response.status,
+          code: data.code,
         }
         throw error
       }
 
-      const data = await response.json()
       return data
     } catch (error) {
       clearTimeout(timeoutId)
