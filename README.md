@@ -30,7 +30,8 @@ Local PC (Download & Store)
     ↓
 Python Script (Preprocessing & Semantic Matching)
     ├── Parse & Preprocess PDFs
-    ├── Generate Vector Embeddings
+    ├── Generate Vector Embeddings (Google Gemini Embedding Model)
+    │   └── Model: gemini-embedding-exp-03-07 (3072 dimensions)
     ├── Store Data → MongoDB
     └── Store Vector Embeddings → Pinecone
 ```
@@ -41,8 +42,11 @@ Python Script (Preprocessing & Semantic Matching)
 Next.js Frontend
     ↓ (User Request)
 FastAPI Backend
-    ↓ (Vector Similarity Search)
-Pinecone (Vector Database)
+    ↓ (Generate Query Embedding)
+Google Gemini Embedding Model
+    └── Model: gemini-embedding-exp-03-07 (3072 dimensions)
+    ↓ (Vector Embedding)
+Pinecone (Vector Database - Similarity Search)
     ↓ (Retrieved Document Chunks)
 Gemini 2.0 Flash Exp (AI Model)
     ↓ (Validated Output)
@@ -54,10 +58,11 @@ Next.js Frontend (Display to User)
 ### RAG (Retrieval Augmented Generation) Flow
 
 1. **User Query** → FastAPI receives user message
-2. **Vector Search** → FastAPI queries Pinecone for semantically similar document chunks
-3. **Context Retrieval** → Pinecone returns relevant document chunks from MongoDB
-4. **AI Generation** → Gemini 2.0 Flash Exp generates response using retrieved context
-5. **Validation** → Response is validated and returned to user
+2. **Query Embedding** → Google Gemini Embedding Model (gemini-embedding-exp-03-07) converts query to 3072-dimensional vector
+3. **Vector Search** → FastAPI queries Pinecone for semantically similar document chunks using the query embedding
+4. **Context Retrieval** → Pinecone returns relevant document chunks from MongoDB
+5. **AI Generation** → Gemini 2.0 Flash Exp generates response using retrieved context
+6. **Validation** → Response is validated and returned to user
 
 ## 📁 Project Structure
 
@@ -136,25 +141,7 @@ npm run dev
 
 The frontend will be available at [http://localhost:3000](http://localhost:3000)
 
-## 📚 Documentation
 
-### Comprehensive Documentation
-
-- **[PROJECT_DOCUMENTATION.md](PROJECT_DOCUMENTATION.md)** - Complete project documentation with detailed explanations, architecture diagrams, and setup guides
-
-### Backend Documentation
-
-- **[Backend README](backend/README.md)** - Complete backend API documentation
-- **[Quick Start Guide](backend/QUICK_START.md)** - Get started in 3 steps
-- **[Testing Guide](backend/TESTING_GUIDE.md)** - How to test the API
-- **[Implementation Details](backend/IMPLEMENTATION_COMPLETE.md)** - What was built
-
-### Frontend Documentation
-
-- **[Frontend README](frontend/README.md)** - Complete frontend documentation
-- **[Implementation Plan](frontend/IMPLEMENTATION_PLAN.md)** - Development roadmap
-
-## 🔧 Environment Variables
 
 ### Backend (.env)
 
@@ -267,7 +254,9 @@ The application uses a sophisticated 3-layer RAG (Retrieval Augmented Generation
 1. **Layer 1: Query Processing & Vectorization**
    - Jurisdiction detection and normalization
    - Query refinement using AI
-   - Vector embedding generation (3072 dimensions)
+   - Vector embedding generation using Google Gemini Embedding Model
+     - Model: `gemini-embedding-exp-03-07`
+     - Dimensions: 3072
 
 2. **Layer 2: Vector Similarity Search**
    - Semantic search in Pinecone vector database
@@ -286,90 +275,17 @@ When a user sends a message:
 1. **User Message Saved** → Stored in MongoDB immediately
 2. **Jurisdiction Detection** → If message contains only jurisdiction (e.g., "US federal"), it's stored for future queries
 3. **Background AI Processing** → FastAPI triggers asynchronous AI response generation
-4. **Vector Search** → Pinecone searches for similar document chunks
-5. **AI Generation** → Gemini generates response using retrieved context
-6. **Response Saved** → Assistant message stored in MongoDB
-7. **Frontend Polling** → Frontend polls for AI response (every 2 seconds)
-8. **UI Update** → Response displayed when ready
+4. **Query Embedding** → Google Gemini Embedding Model (`gemini-embedding-exp-03-07`) converts query to 3072-dimensional vector
+5. **Vector Search** → Pinecone searches for similar document chunks using the query embedding
+6. **AI Generation** → Gemini 2.0 Flash Exp generates response using retrieved context
+7. **Response Saved** → Assistant message stored in MongoDB
+8. **Frontend Polling** → Frontend polls for AI response (every 2 seconds)
+9. **UI Update** → Response displayed when ready
 
-### Jurisdiction Persistence
 
-- Once a user specifies a jurisdiction (e.g., "US federal"), it's stored in the chat
-- All subsequent queries in that chat automatically use the stored jurisdiction
-- Users can change jurisdiction by specifying a new one
-- Supports: US Federal, NY, NYC, NJ, Philadelphia
 
-## 🧪 Testing
 
-### Backend API Testing
 
-```bash
-cd backend
-python test_api.py
-```
-
-Or use the Swagger UI at http://localhost:8000/docs for interactive testing.
-
-### Frontend Testing
-
-The frontend uses mock API by default. To test with real backend:
-1. Set `NEXT_PUBLIC_USE_MOCK_API=false` in `.env.local`
-2. Ensure backend is running on port 8000
-
-## 🚢 Production
-
-### Backend Production
-
-```bash
-# Using uvicorn directly
-uvicorn api.main:app --host 0.0.0.0 --port 8000
-
-# Using Gunicorn with Uvicorn workers
-gunicorn api.main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
-```
-
-### Frontend Production
-
-```bash
-cd frontend
-npm run build
-npm start
-```
-
-## 🐛 Troubleshooting
-
-### Clearing Caches
-
-**Clear Python Cache:**
-```powershell
-Get-ChildItem -Path . -Recurse -Directory -Filter "__pycache__" | Remove-Item -Recurse -Force
-```
-
-**Clear Next.js Cache:**
-```powershell
-Remove-Item -Path "frontend\.next" -Recurse -Force -ErrorAction SilentlyContinue
-```
-
-### Backend Issues
-
-- **MongoDB Connection**: Verify credentials in `.env` and check IP whitelist
-- **Search Engine**: Verify Gemini and Pinecone API keys
-- **CORS Errors**: Check `CORS_ORIGINS` includes your frontend URL
-- **Jurisdiction Not Persisting**: Ensure chat has `jurisdiction` field (new chats have it by default)
-
-### Frontend Issues
-
-- **API Connection**: Verify `NEXT_PUBLIC_API_URL` matches backend URL
-- **Mock Mode**: Set `NEXT_PUBLIC_USE_MOCK_API=false` to use real API
-- **Build Errors**: Clear `.next` folder and restart dev server
-
-### Common Issues
-
-- **AI Response Not Appearing**: Check backend logs for errors, verify Pinecone index exists
-- **Jurisdiction Loop**: Ensure latest code is deployed (jurisdiction persistence fix)
-- **Slow Responses**: AI generation takes 10-30 seconds (asynchronous background processing)
-
-See individual README files for more detailed troubleshooting.
 
 ## 📝 License
 
