@@ -7,6 +7,7 @@ from api.models import (
 )
 from api.services.message_service import MessageService
 from api.services.ai_service import AIService
+from api.services.chat_service import ChatService
 
 router = APIRouter(prefix="/api/chats", tags=["messages"])
 
@@ -25,7 +26,13 @@ async def get_messages(chat_id: str):
 def generate_and_save_ai_response(chat_id: str, user_message: str):
     """Background task to generate and save AI response."""
     try:
-        ai_response = AIService.generate_response(user_message)
+        # Get stored jurisdiction from chat
+        jurisdiction = ChatService.get_chat_jurisdiction(chat_id)
+        if jurisdiction:
+            print(f"✅ Using stored jurisdiction for chat {chat_id}: {jurisdiction}")
+        else:
+            print(f"ℹ️  No stored jurisdiction for chat {chat_id}, will detect from query if needed")
+        ai_response = AIService.generate_response(user_message, jurisdiction)
         MessageService.create_message(chat_id, ai_response, "assistant")
     except Exception as e:
         print(f"Error generating AI response: {e}")

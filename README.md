@@ -1,15 +1,63 @@
 # Fairly - Domestic Worker Rights Chat Application
 
-A modern full-stack chat application built with Next.js and FastAPI, featuring AI-powered responses using RAG (Retrieval Augmented Generation) for domestic worker rights information.
+A modern full-stack chat application built with Next.js and FastAPI, featuring AI-powered responses using RAG (Retrieval Augmented Generation) for domestic worker rights information. The system processes government documents and provides accurate, context-aware answers based on legal regulations.
 
 ## 🎯 Features
 
-- **AI-Powered Chat**: Intelligent responses using Google Gemini and Pinecone vector search
-- **RAG System**: 3-layer search engine for accurate, context-aware responses
-- **Modern UI**: Clean, Gemini-inspired design with dark mode support
+- **AI-Powered Chat**: Intelligent responses using Google Gemini 2.0 Flash Exp and Pinecone vector search
+- **RAG System**: 3-layer search engine for accurate, context-aware responses from legal documents
+- **Jurisdiction-Aware**: Remembers user's jurisdiction preference across conversations
+- **Modern UI**: Clean, Gemini-inspired design with customizable themes (Caffeine, Neo Brutalism) and dark/light modes
 - **Full-Stack**: Complete REST API backend with MongoDB persistence
 - **Type-Safe**: Full TypeScript support on frontend, Pydantic models on backend
 - **No Auth Required**: Works immediately without authentication (optional auth available)
+- **Document-Based**: Answers sourced from verified government documents and legal regulations
+
+## 🏗️ System Architecture
+
+![System Architecture Diagram](docs/architecture-diagram.jpg)
+
+*Architecture diagram showing data ingestion pipeline (top) and user request processing pipeline (bottom)*
+
+Fairly uses a two-pipeline architecture: **Data Ingestion & Preprocessing** and **User Request Processing**.
+
+### Data Ingestion Pipeline
+
+```
+Government Websites (PDFs)
+    ↓
+Local PC (Download & Store)
+    ↓
+Python Script (Preprocessing & Semantic Matching)
+    ├── Parse & Preprocess PDFs
+    ├── Generate Vector Embeddings
+    ├── Store Data → MongoDB
+    └── Store Vector Embeddings → Pinecone
+```
+
+### User Request Pipeline
+
+```
+Next.js Frontend
+    ↓ (User Request)
+FastAPI Backend
+    ↓ (Vector Similarity Search)
+Pinecone (Vector Database)
+    ↓ (Retrieved Document Chunks)
+Gemini 2.0 Flash Exp (AI Model)
+    ↓ (Validated Output)
+FastAPI Backend
+    ↓ (Response)
+Next.js Frontend (Display to User)
+```
+
+### RAG (Retrieval Augmented Generation) Flow
+
+1. **User Query** → FastAPI receives user message
+2. **Vector Search** → FastAPI queries Pinecone for semantically similar document chunks
+3. **Context Retrieval** → Pinecone returns relevant document chunks from MongoDB
+4. **AI Generation** → Gemini 2.0 Flash Exp generates response using retrieved context
+5. **Validation** → Response is validated and returned to user
 
 ## 📁 Project Structure
 
@@ -26,8 +74,8 @@ HACK-RUC/
 │   │   ├── services/     # Business logic (chat, message, AI)
 │   │   └── models.py     # Pydantic models
 │   ├── search engine/    # RAG search engine (3-layer architecture)
-│   ├── data-preprocessing/  # Data processing scripts
-│   └── embdedding/       # Embedding generation scripts
+│   ├── data-preprocessing/  # PDF parsing & preprocessing scripts
+│   └── embdedding/       # Vector embedding generation scripts
 └── README.md             # This file
 ```
 
@@ -90,6 +138,10 @@ The frontend will be available at [http://localhost:3000](http://localhost:3000)
 
 ## 📚 Documentation
 
+### Comprehensive Documentation
+
+- **[PROJECT_DOCUMENTATION.md](PROJECT_DOCUMENTATION.md)** - Complete project documentation with detailed explanations, architecture diagrams, and setup guides
+
 ### Backend Documentation
 
 - **[Backend README](backend/README.md)** - Complete backend API documentation
@@ -144,6 +196,16 @@ NEXT_PUBLIC_USE_MOCK_API=false
 
 ## 🛠️ Development
 
+### Starting Fresh (Clear Caches)
+
+```powershell
+# Clear Python cache
+Get-ChildItem -Path . -Recurse -Directory -Filter "__pycache__" | Remove-Item -Recurse -Force
+
+# Clear Next.js cache
+Remove-Item -Path "frontend\.next" -Recurse -Force -ErrorAction SilentlyContinue
+```
+
 ### Backend Development
 
 ```bash
@@ -152,6 +214,10 @@ python run_api.py          # Start with auto-reload
 python test_api.py          # Run API tests
 ```
 
+**Backend runs on:** `http://localhost:8000`
+- Swagger UI: http://localhost:8000/docs
+- Health Check: http://localhost:8000/health
+
 ### Frontend Development
 
 ```bash
@@ -159,6 +225,22 @@ cd frontend
 npm run dev                 # Start development server
 npm run build               # Build for production
 npm run lint                # Run linter
+```
+
+**Frontend runs on:** `http://localhost:3000`
+
+### Running Both Servers
+
+**Terminal 1 (Backend):**
+```bash
+cd backend
+python run_api.py
+```
+
+**Terminal 2 (Frontend):**
+```bash
+cd frontend
+npm run dev
 ```
 
 ## 📡 API Endpoints
@@ -176,19 +258,46 @@ npm run lint                # Run linter
 - `PATCH /api/chats/{chat_id}/messages/{message_id}` - Update message
 - `DELETE /api/chats/{chat_id}/messages/{message_id}` - Delete message
 
-## 🧠 AI Integration
+## 🧠 AI Integration & RAG System
 
-The application uses a 3-layer RAG (Retrieval Augmented Generation) system:
+The application uses a sophisticated 3-layer RAG (Retrieval Augmented Generation) system powered by Google Gemini 2.0 Flash Exp:
 
-1. **Layer 1**: Query processing, jurisdiction detection, and vectorization
-2. **Layer 2**: Vector similarity search in Pinecone
-3. **Layer 3**: Response generation with Google Gemini
+### 3-Layer Architecture
 
-When a user sends a message, the system:
-1. Saves the user message
-2. Generates an AI response using the search engine (asynchronously)
-3. Saves the assistant response
-4. Updates chat metadata
+1. **Layer 1: Query Processing & Vectorization**
+   - Jurisdiction detection and normalization
+   - Query refinement using AI
+   - Vector embedding generation (3072 dimensions)
+
+2. **Layer 2: Vector Similarity Search**
+   - Semantic search in Pinecone vector database
+   - Retrieves top-k most relevant document chunks
+   - Filters by jurisdiction when specified
+
+3. **Layer 3: Response Generation**
+   - Context-aware response generation using Gemini 2.0 Flash Exp
+   - Validates response relevance to query
+   - Returns human-readable answers based on retrieved documents
+
+### Request Processing Flow
+
+When a user sends a message:
+
+1. **User Message Saved** → Stored in MongoDB immediately
+2. **Jurisdiction Detection** → If message contains only jurisdiction (e.g., "US federal"), it's stored for future queries
+3. **Background AI Processing** → FastAPI triggers asynchronous AI response generation
+4. **Vector Search** → Pinecone searches for similar document chunks
+5. **AI Generation** → Gemini generates response using retrieved context
+6. **Response Saved** → Assistant message stored in MongoDB
+7. **Frontend Polling** → Frontend polls for AI response (every 2 seconds)
+8. **UI Update** → Response displayed when ready
+
+### Jurisdiction Persistence
+
+- Once a user specifies a jurisdiction (e.g., "US federal"), it's stored in the chat
+- All subsequent queries in that chat automatically use the stored jurisdiction
+- Users can change jurisdiction by specifying a new one
+- Supports: US Federal, NY, NYC, NJ, Philadelphia
 
 ## 🧪 Testing
 
@@ -229,16 +338,36 @@ npm start
 
 ## 🐛 Troubleshooting
 
+### Clearing Caches
+
+**Clear Python Cache:**
+```powershell
+Get-ChildItem -Path . -Recurse -Directory -Filter "__pycache__" | Remove-Item -Recurse -Force
+```
+
+**Clear Next.js Cache:**
+```powershell
+Remove-Item -Path "frontend\.next" -Recurse -Force -ErrorAction SilentlyContinue
+```
+
 ### Backend Issues
 
 - **MongoDB Connection**: Verify credentials in `.env` and check IP whitelist
 - **Search Engine**: Verify Gemini and Pinecone API keys
 - **CORS Errors**: Check `CORS_ORIGINS` includes your frontend URL
+- **Jurisdiction Not Persisting**: Ensure chat has `jurisdiction` field (new chats have it by default)
 
 ### Frontend Issues
 
 - **API Connection**: Verify `NEXT_PUBLIC_API_URL` matches backend URL
 - **Mock Mode**: Set `NEXT_PUBLIC_USE_MOCK_API=false` to use real API
+- **Build Errors**: Clear `.next` folder and restart dev server
+
+### Common Issues
+
+- **AI Response Not Appearing**: Check backend logs for errors, verify Pinecone index exists
+- **Jurisdiction Loop**: Ensure latest code is deployed (jurisdiction persistence fix)
+- **Slow Responses**: AI generation takes 10-30 seconds (asynchronous background processing)
 
 See individual README files for more detailed troubleshooting.
 

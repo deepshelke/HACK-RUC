@@ -43,7 +43,23 @@ class ChatService:
             if chat.get('lastMessageAt'):
                 chat['lastMessageAt'] = to_iso_string(chat['lastMessageAt'])
             
+            # Ensure jurisdiction field exists (for backward compatibility)
+            if 'jurisdiction' not in chat:
+                chat['jurisdiction'] = None
+            
             return chat
+        except Exception:
+            return None
+    
+    @staticmethod
+    def get_chat_jurisdiction(chat_id: str) -> Optional[str]:
+        """Get the stored jurisdiction for a chat."""
+        try:
+            collection = Database.get_collection(CHATS_COLLECTION)
+            chat = collection.find_one({"_id": ObjectId(chat_id)}, {"jurisdiction": 1})
+            if chat:
+                return chat.get("jurisdiction")
+            return None
         except Exception:
             return None
     
@@ -64,7 +80,8 @@ class ChatService:
             "createdAt": now,
             "updatedAt": now,
             "messageCount": 0,
-            "userId": "anonymous"
+            "userId": "anonymous",
+            "jurisdiction": None  # Store last specified jurisdiction
         }
         
         collection.insert_one(chat)

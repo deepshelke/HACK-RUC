@@ -7,6 +7,46 @@ from typing import List, Optional
 from bson import ObjectId
 from api.services.chat_service import ChatService
 
+# Jurisdiction mapping for detection
+JURISDICTIONS = {
+    "fed": "US_FEDERAL",
+    "federal": "US_FEDERAL",
+    "us federal": "US_FEDERAL",
+    "us fed": "US_FEDERAL",
+    "ny": "NY",
+    "new york": "NY",
+    "new york state": "NY",
+    "nyc": "NYC",
+    "new york city": "NYC",
+    "nj": "NJ",
+    "new jersey": "NJ",
+    "philly": "PHILADELPHIA",
+    "philadelphia": "PHILADELPHIA"
+}
+
+def detect_jurisdiction_in_message(content: str) -> Optional[str]:
+    """Detect if message contains only a jurisdiction specification."""
+    content_lower = content.lower().strip()
+    
+    # Check for exact matches
+    for key, value in JURISDICTIONS.items():
+        if content_lower == key or content_lower == value.lower():
+            return value
+    
+    # Check for common variations
+    if content_lower in ["us federal", "us fed", "federal", "fed"]:
+        return "US_FEDERAL"
+    elif content_lower in ["ny", "nyc", "nj"]:
+        return content_lower.upper()
+    elif "new york" in content_lower:
+        return "NYC" if "city" in content_lower or content_lower == "nyc" else "NY"
+    elif "new jersey" in content_lower or content_lower == "nj":
+        return "NJ"
+    elif "philadelphia" in content_lower or "philly" in content_lower:
+        return "PHILADELPHIA"
+    
+    return None
+
 def to_iso_string(dt: datetime) -> str:
     """Convert datetime to ISO 8601 string."""
     return dt.isoformat() + 'Z'
@@ -42,6 +82,18 @@ class MessageService:
         }
         
         collection.insert_one(message)
+        
+        # If user message contains only jurisdiction, store it in chat
+        if role == "user":
+            detected_jurisdiction = detect_jurisdiction_in_message(content)
+            if detected_jurisdiction:
+                # Update chat with jurisdiction
+                chat_collection = Database.get_collection(CHATS_COLLECTION)
+                chat_collection.update_one(
+                    {"_id": ObjectId(chat_id)},
+                    {"$set": {"jurisdiction": detected_jurisdiction}}
+                )
+                print(f"✅ Stored jurisdiction '{detected_jurisdiction}' for chat {chat_id}")
         
         # Update chat metadata
         messages = MessageService.get_messages_by_chat_id(chat_id)
